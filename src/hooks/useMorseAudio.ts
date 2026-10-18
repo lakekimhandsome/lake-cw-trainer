@@ -48,7 +48,7 @@ export function useMorseAudio() {
         const gain = ctx.createGain()
         oscillator.type = 'sine'
         oscillator.frequency.setValueAtTime(settings.tone, at)
-        const level = settings.volume / 100 * 0.18
+        const level = settings.volume / 100 * 0.8
         const ramp = Math.min(0.005, duration / 4)
         gain.gain.setValueAtTime(0, at)
         gain.gain.linearRampToValueAtTime(level, at + ramp)
@@ -82,7 +82,7 @@ export function useMorseAudio() {
       const gain = ctx.createGain()
       oscillator.frequency.value = settings.tone
       gain.gain.setValueAtTime(0, ctx.currentTime)
-      gain.gain.linearRampToValueAtTime(settings.volume / 100 * 0.18, ctx.currentTime + 0.004)
+      gain.gain.linearRampToValueAtTime(settings.volume / 100 * 0.8, ctx.currentTime + 0.004)
       oscillator.connect(gain).connect(ctx.destination)
       oscillator.onended = () => { oscillator.disconnect(); gain.disconnect() }
       oscillator.start()
