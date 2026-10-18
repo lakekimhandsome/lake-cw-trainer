@@ -36,7 +36,7 @@ describe('preset storage', () => {
     expect(loadTraining()).toEqual(training)
   })
 
-  it('keeps common settings across preset switches and reloads', () => {
+  it('keeps signal settings across preset switches and reloads', () => {
     const settings = { ...loadSettings(), tone: 900, volume: 25, autoPlay: true }
     saveSettings(settings)
     saveTraining(applyPreset(loadTraining(), 35, 20))

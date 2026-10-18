@@ -17,7 +17,7 @@ export function SpeedControls({ settings, presets, activePresetId, onApplyPreset
     <Slider label="실효 속도" value={speed.effectiveWpm} min={5} max={speed.characterWpm} unit="WPM" onChange={(effectiveWpm) => setSpeed({ ...speed, effectiveWpm })} />
     <button className="secondary-button preset-save" disabled={!changed} onClick={() => onApplyPreset(speed.characterWpm, speed.effectiveWpm)}>프리셋 저장 및 적용</button>
     <p className="preset-hint">저장 및 적용하면 새 문제로 시작합니다.</p>
-    <div className="section-kicker common-heading">공통 설정</div>
+    <div className="section-kicker common-heading">신호 설정</div>
     <Slider label="톤" value={settings.tone} min={400} max={1000} unit="Hz" onChange={(tone) => onChange({ tone })} />
     <Slider label="볼륨" value={settings.volume} min={0} max={100} unit="%" onChange={(volume) => onChange({ volume })} />
     <label className="switch-row"><span><strong>자동 재생</strong><small>다음 문제에서 자동으로 시작</small></span><input type="checkbox" checked={settings.autoPlay} onChange={(event) => onChange({ autoPlay: event.target.checked })} /></label>
