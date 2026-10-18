@@ -7,6 +7,7 @@ import { SpeedControls } from './components/SpeedControls'
 import { Statistics } from './components/Statistics'
 import { useMorseAudio } from './hooks/useMorseAudio'
 import { generateProblem } from './lib/generator'
+import { LEVEL_GUIDES } from './data/templates'
 import { gradeAnswer } from './lib/grading'
 import { applyPreset, defaultStatistics, loadSettings, loadTraining, recordGrade, saveSettings, saveTraining } from './lib/storage'
 import type { Grade, Level, Settings } from './types'
@@ -42,9 +43,9 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleEnter)
   })
 
-  const nextProblem = (level = settings.level) => {
+  const nextProblem = () => {
     stopPlayback()
-    const next = generateProblem(level, problem.text)
+    const next = generateProblem(settings.level, problem.text)
     setProblem(next); setInput(''); setGrade(null)
     if (settings.autoPlay) autoPlayTimer.current = window.setTimeout(() => void play(next.text, settings), 60)
   }
@@ -53,7 +54,9 @@ export default function App() {
     stopPlayback()
     const next = { ...settings, ...update }
     setSettings(next)
-    if (update.level && update.level !== settings.level) nextProblem(update.level)
+    if (update.level && update.level !== settings.level) {
+      setProblem(generateProblem(update.level, problem.text)); setInput(''); setGrade(null)
+    }
   }
 
   const selectPreset = (characterWpm: number, effectiveWpm: number) => {
@@ -74,7 +77,8 @@ export default function App() {
     <header><a className="brand" href="/" aria-label="Lake CW Trainer 처음으로"><span className="brand-mark"><Radio size={22} aria-hidden="true" /></span><span>LAKE <b>CW TRAINER</b></span></a><div className="mode-pill"><i /> RX MODE</div></header>
     <div className="layout">
       <section className="trainer-card">
-        <div className="lesson-head"><div><div className="section-kicker">수신 훈련</div><h1>소리를 듣고<br />교신을 읽으세요.</h1></div><label className="level-select">난이도 <select value={settings.level} onChange={(event) => updateSettings({ level: Number(event.target.value) as Level })}>{[1, 2, 3, 4, 5].map((level) => <option key={level} value={level}>Level {level}</option>)}</select></label></div>
+        <div className="lesson-head"><div><div className="section-kicker">수신 훈련</div><h1>소리를 듣고<br />교신을 읽으세요.</h1></div><label className="level-select">난이도 <select value={settings.level} onChange={(event) => updateSettings({ level: Number(event.target.value) as Level })}>{[1, 2, 3, 4, 5].map((level) => <option key={level} value={level}>Level {level} · {LEVEL_GUIDES[level as Level].title}</option>)}</select></label></div>
+        <p className="level-guide" aria-live="polite"><strong>Level {settings.level} · {LEVEL_GUIDES[settings.level].title}</strong><span>{LEVEL_GUIDES[settings.level].description}</span></p>
         <div className={`signal-panel ${isPlaying ? 'active' : ''}`}><div className="signal-label"><span>{isPlaying ? 'RECEIVING' : 'READY'}</span><time>CH {settings.characterWpm} · EF {settings.effectiveWpm} WPM</time></div><div className="wave" aria-hidden="true">·· ·· ··· ·· ···· · ··· ·· ···</div><p>원문은 채점 후 표시됩니다.</p></div>
         <AudioControls isPlaying={isPlaying} onPlay={() => void play(problem.text, settings)} onStop={stopPlayback} onNext={() => nextProblem()} />
         {audioError && <p className="audio-error" role="alert">{audioError}</p>}
