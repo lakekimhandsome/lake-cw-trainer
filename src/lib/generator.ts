@@ -8,7 +8,7 @@ const rst = () => `${pick(['5', '5', '5', '5', '4'])}${pick(['9', '9', '7', '5']
 
 export function generateProblem(level: Level, previous?: string): Problem {
   let text = previous ?? ''
-  for (let attempt = 0; attempt < 6 && text === previous; attempt += 1) {
+  for (let attempt = 0; attempt < 6 && (attempt === 0 || text === previous); attempt += 1) {
     text = pick(TEMPLATES[level]).replaceAll('{CALL}', call).replace('{RST}', rst()).replace('{QTH}', pick(QTHS)).replace('{NAME}', pick(NAMES))
   }
   return { text, level }
