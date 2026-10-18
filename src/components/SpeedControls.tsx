@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import type { Preset, Settings } from '../types'
 
-type Props = { settings: Settings; presets: Preset[]; activePresetId: string; onApplyPreset: (characterWpm: number, effectiveWpm: number) => void; onChange: (next: Partial<Settings>) => void }
+type Props = { showAutoPlay?: boolean; settings: Settings; presets: Preset[]; activePresetId: string; onApplyPreset: (characterWpm: number, effectiveWpm: number) => void; onChange: (next: Partial<Settings>) => void }
 const Slider = ({ label, value, min, max, unit, onChange }: { label: string; value: number; min: number; max: number; unit: string; onChange: (value: number) => void }) => <label className="slider-row">
   <span><strong>{label}</strong><em>{value} {unit}</em></span>
   <input type="range" min={min} max={max} value={value} onChange={(event) => onChange(Number(event.target.value))} />
 </label>
 
-export function SpeedControls({ settings, presets, activePresetId, onApplyPreset, onChange }: Props) {
+export function SpeedControls({ settings, presets, activePresetId, onApplyPreset, onChange, showAutoPlay = true }: Props) {
   const [speed, setSpeed] = useState({ characterWpm: settings.characterWpm, effectiveWpm: settings.effectiveWpm })
   const changed = speed.characterWpm !== settings.characterWpm || speed.effectiveWpm !== settings.effectiveWpm
   return <section className="settings-card" aria-label="CW 설정">
@@ -20,6 +20,6 @@ export function SpeedControls({ settings, presets, activePresetId, onApplyPreset
     <div className="section-kicker common-heading">신호 설정</div>
     <Slider label="톤" value={settings.tone} min={400} max={1000} unit="Hz" onChange={(tone) => onChange({ tone })} />
     <Slider label="볼륨" value={settings.volume} min={0} max={100} unit="%" onChange={(volume) => onChange({ volume })} />
-    <label className="switch-row"><span><strong>자동 재생</strong><small>다음 문제에서 자동으로 시작</small></span><input className="toggle-switch" type="checkbox" checked={settings.autoPlay} onChange={(event) => onChange({ autoPlay: event.target.checked })} /></label>
+    {showAutoPlay && <label className="switch-row"><span><strong>자동 재생</strong><small>다음 문제에서 자동으로 시작</small></span><input className="toggle-switch" type="checkbox" checked={settings.autoPlay} onChange={(event) => onChange({ autoPlay: event.target.checked })} /></label>}
   </section>
 }

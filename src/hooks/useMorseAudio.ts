@@ -5,12 +5,14 @@ import type { Settings } from '../types'
 
 export function useMorseAudio() {
   const context = useRef<AudioContext | null>(null)
+  const revision = useRef(0)
   const nodes = useRef<OscillatorNode[]>([])
   const finishTimer = useRef<number | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const stop = useCallback(() => {
+    revision.current += 1
     nodes.current.forEach((node) => { try { node.stop() } catch { /* Already stopped. */ } })
     nodes.current = []
     if (finishTimer.current) window.clearTimeout(finishTimer.current)
@@ -20,6 +22,7 @@ export function useMorseAudio() {
 
   const play = useCallback(async (text: string, settings: Settings) => {
     stop()
+    const request = revision.current
     setError(null)
     const AudioContextClass = window.AudioContext ?? window.webkitAudioContext
     if (!AudioContextClass) {
@@ -33,6 +36,7 @@ export function useMorseAudio() {
       setError('오디오를 시작하지 못했습니다. 재생 버튼을 다시 눌러 주세요.')
       return
     }
+    if (request !== revision.current) return
     const ctx = context.current
     const timing = getTiming(settings.characterWpm, settings.effectiveWpm)
     const start = ctx.currentTime + 0.035
@@ -63,6 +67,32 @@ export function useMorseAudio() {
     finishTimer.current = window.setTimeout(() => { nodes.current = []; setIsPlaying(false) }, Math.max(0, (at - ctx.currentTime) * 1000 + 30))
   }, [stop])
 
-  useEffect(() => () => { stop(); void context.current?.close() }, [stop])
-  return { isPlaying, error, play, stop }
+  const startTone = useCallback(async (settings: Settings) => {
+    stop()
+    const request = revision.current
+    setError(null)
+    try {
+      const AudioContextClass = window.AudioContext ?? window.webkitAudioContext
+      if (!AudioContextClass) throw new Error('Web Audio unavailable')
+      context.current ??= new AudioContextClass()
+      const ctx = context.current
+      if (ctx.state === 'suspended') await ctx.resume()
+      if (request !== revision.current) return
+      const oscillator = ctx.createOscillator()
+      const gain = ctx.createGain()
+      oscillator.frequency.value = settings.tone
+      gain.gain.setValueAtTime(0, ctx.currentTime)
+      gain.gain.linearRampToValueAtTime(settings.volume / 100 * 0.18, ctx.currentTime + 0.004)
+      oscillator.connect(gain).connect(ctx.destination)
+      oscillator.onended = () => { oscillator.disconnect(); gain.disconnect() }
+      oscillator.start()
+      nodes.current.push(oscillator)
+      setIsPlaying(true)
+    } catch {
+      if (request === revision.current) setError('오디오를 시작하지 못했습니다. 키 영역을 다시 눌러 주세요.')
+    }
+  }, [stop])
+
+  useEffect(() => () => { stop(); void context.current?.close(); context.current = null }, [stop])
+  return { isPlaying, error, play, stop, startTone }
 }

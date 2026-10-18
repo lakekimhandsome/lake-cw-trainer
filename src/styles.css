@@ -25,3 +25,23 @@ aside { display: grid; gap: 22px; }.settings-card, .statistics-card { padding: 2
 .switch-row .toggle-switch { appearance: none; background: #3b453b; border: 1px solid #5b685b; border-radius: 999px; cursor: pointer; height: 22px; margin: 0; position: relative; transition: background .15s ease; width: 40px; }.switch-row .toggle-switch::after { background: #e9eee5; border-radius: 50%; content: ''; height: 16px; left: 2px; position: absolute; top: 2px; transition: transform .15s ease; width: 16px; }.switch-row .toggle-switch:checked { background: #78b84d; border-color: #9adb70; }.switch-row .toggle-switch:checked::after { transform: translateX(17px); }
 
 .level-guide { color: #9eac9d; display: grid; font-size: 12px; gap: 6px; line-height: 1.65; margin: 0 0 20px; overflow-wrap: anywhere; }.level-guide strong { color: #d7e6cf; font-size: 13px; }.level-select select { max-width: 100%; }.level-select { min-width: 0; }
+
+.mode-switch { display: flex; gap: 3px; padding: 4px; border: 1px solid #303c31; border-radius: 12px; background: #19211b; }
+.mode-switch button { border: 0; border-radius: 8px; padding: 8px 12px; background: transparent; color: #9eac9d; font-size: 12px; font-weight: 700; }
+.mode-switch button[aria-pressed="true"] { background: #b8f86e; color: #172218; }
+.tx-prompt { background: #111613; border: 1px solid #2b352c; border-radius: 17px; padding: 20px; }
+.tx-prompt p { color: #d7f4c5; font: 600 22px/1.6 ui-monospace, monospace; overflow-wrap: anywhere; margin: 10px 0; }
+.tx-prompt small, .tx-guide { color: #a3b19f; font-size: 12px; line-height: 1.8; }
+.tx-timing { color: #9aac99; font: 11px/1.8 ui-monospace, monospace; }
+.key-pad { display: grid; gap: 10px; place-content: center; width: 100%; min-height: 170px; margin: 18px 0; border: 2px solid #465c3e; border-radius: 18px; background: #202e21; color: #c6efad; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.key-pad span { font: 10px ui-monospace, monospace; letter-spacing: .14em; }
+.key-pad strong { font-size: 28px; }
+.key-pad small { font-size: 12px; }
+.key-pad.pressed { background: #b8f86e; color: #172218; border-color: #d3ffa5; }
+.key-pad:disabled { opacity: .5; cursor: default; }
+.tx-output { border-bottom: 1px solid #303932; padding: 10px 0; }
+.tx-output p { min-height: 28px; color: #c9d9c0; font: 15px/1.8 ui-monospace, monospace; overflow-wrap: anywhere; white-space: pre-wrap; }
+.tx-output b { color: #b8f86e; margin-left: 8px; }
+.transmit-trainer .audio-error { margin: 12px 0; }
+.play-button:disabled { cursor: default; opacity: .4; }
+@media (max-width: 560px) { .mode-switch button { padding: 8px; font-size: 11px; } .tx-prompt p { font-size: 18px; } }
