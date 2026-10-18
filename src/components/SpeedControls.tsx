@@ -20,6 +20,6 @@ export function SpeedControls({ settings, presets, activePresetId, onApplyPreset
     <div className="section-kicker common-heading">신호 설정</div>
     <Slider label="톤" value={settings.tone} min={400} max={1000} unit="Hz" onChange={(tone) => onChange({ tone })} />
     <Slider label="볼륨" value={settings.volume} min={0} max={100} unit="%" onChange={(volume) => onChange({ volume })} />
-    <label className="switch-row"><span><strong>자동 재생</strong><small>다음 문제에서 자동으로 시작</small></span><input type="checkbox" checked={settings.autoPlay} onChange={(event) => onChange({ autoPlay: event.target.checked })} /></label>
+    <label className="switch-row"><span><strong>자동 재생</strong><small>다음 문제에서 자동으로 시작</small></span><input className="toggle-switch" type="checkbox" checked={settings.autoPlay} onChange={(event) => onChange({ autoPlay: event.target.checked })} /></label>
   </section>
 }
