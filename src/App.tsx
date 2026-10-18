@@ -60,7 +60,6 @@ export default function App() {
     setTraining((current) => applyPreset(current, characterWpm, effectiveWpm))
     const next = generateProblem(settings.level, problem.text)
     setProblem(next); setInput(''); setGrade(null)
-    if (settings.autoPlay) void play(next.text, { ...settings, characterWpm, effectiveWpm })
   }
 
   const submit = () => {
