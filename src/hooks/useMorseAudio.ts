@@ -27,12 +27,8 @@ export function useMorseAudio() {
       return
     }
     try {
-      if (!context.current || context.current.state === 'closed') context.current = new AudioContextClass()
+      context.current ??= new AudioContextClass()
       if (context.current.state === 'suspended') await context.current.resume()
-      if (context.current.state !== 'running') {
-        setError('오디오가 브라우저에 의해 중지되었습니다. 이 페이지를 클릭한 뒤 다시 재생해 주세요.')
-        return
-      }
     } catch {
       setError('오디오를 시작하지 못했습니다. 재생 버튼을 다시 눌러 주세요.')
       return
@@ -48,7 +44,7 @@ export function useMorseAudio() {
         const gain = ctx.createGain()
         oscillator.type = 'sine'
         oscillator.frequency.setValueAtTime(settings.tone, at)
-        const level = settings.volume / 100 * 0.35
+        const level = settings.volume / 100 * 0.18
         const ramp = Math.min(0.005, duration / 4)
         gain.gain.setValueAtTime(0, at)
         gain.gain.linearRampToValueAtTime(level, at + ramp)
