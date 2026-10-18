@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { MORSE, PROSIGNS, tokenizeMorse } from './morse'
-import { decodeMorse, transmissionTiming } from './transmission'
+import { applyTransmission, decodeMorse, transmissionTiming } from './transmission'
 import { getTiming } from './timing'
 
 describe('straight key decoding', () => {
@@ -8,7 +8,19 @@ describe('straight key decoding', () => {
     for (const [letter, code] of Object.entries({ ...MORSE, ...PROSIGNS })) {
       expect(decodeMorse(code)).toBe(code === '-...-' ? '<BT>' : letter)
     }
-    expect(decodeMorse('........')).toBe('�')
+    expect(decodeMorse('.......')).toBe('�')
+  })
+  it('erases the previous character with eight dots, including after a word pause', () => {
+    expect(applyTransmission('CQ', '........')).toBe('C')
+    expect(applyTransmission('CQ ', '........')).toBe('C')
+    expect(applyTransmission('CQ DE ', '........')).toBe('CQ D')
+    expect(applyTransmission('CQ <AR> ', '........')).toBe('CQ ')
+    expect(applyTransmission('CQ <BT>', '........')).toBe('CQ ')
+    expect(applyTransmission('', '........')).toBe('')
+    expect(applyTransmission(' ', '........')).toBe('')
+    expect(applyTransmission(applyTransmission('A', '........'), '........')).toBe('')
+    expect(applyTransmission(applyTransmission('CQ <SK>', '........'), '.-')).toBe('CQ A')
+    expect(applyTransmission('CQ ', '.......')).toBe('CQ �')
   })
   it.each([[20, 20], [20, 10], [40, 5], [5, 5]])('separates marks and gaps at %d/%d WPM', (character, effective) => {
     const standard = getTiming(character, effective)

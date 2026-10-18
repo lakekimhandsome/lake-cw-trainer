@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMorseAudio } from '../hooks/useMorseAudio'
 import { gradeAnswer } from '../lib/grading'
-import { decodeMorse, transmissionTiming } from '../lib/transmission'
+import { applyTransmission, transmissionTiming } from '../lib/transmission'
 import { GradingResult } from './GradingResult'
 import type { Grade, Problem, Settings } from '../types'
 
@@ -23,7 +23,7 @@ export function TransmitTrainer({ problem, settings, onNext }: Props) {
   const clearTimers = () => { timers.current.forEach(window.clearTimeout); timers.current = [] }
   const flushLetter = () => {
     if (!pending.current) return
-    decoded.current += decodeMorse(pending.current)
+    decoded.current = applyTransmission(decoded.current, pending.current)
     pending.current = ''
     setText(decoded.current); setMarks('')
   }
@@ -97,7 +97,7 @@ export function TransmitTrainer({ problem, settings, onNext }: Props) {
 
   return <div className="transmit-trainer">
     <div className="tx-prompt"><span className="section-kicker">이 문장을 송신하세요</span><p>{problem.text}</p><small>{problem.translation}</small></div>
-    <p className="tx-guide">아무 키나 짧게 누르면 단점(·), 길게 누르면 장점(−)입니다. 모바일에서는 아래 키 영역을 누르세요. 문자와 단어는 쉬는 시간으로 구분합니다.</p>
+    <p className="tx-guide">아무 키나 짧게 누르면 단점(·), 길게 누르면 장점(−)입니다. 모바일에서는 아래 키 영역을 누르세요. 문자와 단어는 쉬는 시간으로 구분합니다. 단점 8개(........)를 이어 보내면 직전 문자를 지웁니다.</p>
     <p className="tx-timing">단점 {Math.round(timing.dit)} ms · 장점 {Math.round(timing.dah)} ms<br />문자 사이 {Math.round(timing.letterPause)} ms · 단어 사이 {Math.round(timing.wordPause)} ms</p>
     <button ref={pad} type="button" className={`key-pad ${pressed ? 'pressed' : ''}`} aria-label="모스 송신 키" aria-pressed={pressed} disabled={Boolean(grade)}
       onPointerDown={(event) => { if (event.button !== 0) return; event.preventDefault(); event.currentTarget.focus(); event.currentTarget.setPointerCapture(event.pointerId); down(`pointer:${event.pointerId}`) }}

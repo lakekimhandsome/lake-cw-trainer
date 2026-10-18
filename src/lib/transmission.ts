@@ -7,6 +7,11 @@ export function decodeMorse(code: string): string {
   return characters[code] ?? '�'
 }
 
+export function applyTransmission(text: string, code: string): string {
+  if (code === '........') return text.trimEnd().replace(/<[^>]+>$|.$/u, '')
+  return text + decodeMorse(code)
+}
+
 export function transmissionTiming(characterWpm: number, effectiveWpm: number) {
   const timing = getTiming(characterWpm, effectiveWpm)
   return {
