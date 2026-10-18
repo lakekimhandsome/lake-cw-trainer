@@ -10,6 +10,7 @@ describe('problem generation', () => {
     const problem = generateProblem(level)
     expect(problem.level).toBe(level)
     expect(problem.text.length).toBeGreaterThan(0)
+    expect(problem.translation.length).toBeGreaterThan(0)
     expect(problem.text).not.toMatch(/[{}]/)
     expect(tokenizeMorse(problem.text).length).toBeGreaterThan(0)
   })

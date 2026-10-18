@@ -83,7 +83,7 @@ export default function App() {
         <AudioControls isPlaying={isPlaying} onPlay={() => void play(problem.text, settings)} onStop={stopPlayback} onNext={() => nextProblem()} />
         {audioError && <p className="audio-error" role="alert">{audioError}</p>}
         <AnswerInput value={input} disabled={Boolean(grade)} onChange={setInput} onSubmit={submit} />
-        {grade && <GradingResult grade={grade} />}
+        {grade && <GradingResult grade={grade} translation={problem.translation} />}
       </section>
       <aside><SpeedControls key={preset.id} settings={settings} presets={training.presets} activePresetId={preset.id} onApplyPreset={selectPreset} onChange={updateSettings} /><Statistics statistics={preset.statistics} presetLabel={`${preset.characterWpm} / ${preset.effectiveWpm} WPM`} errors={training.errors} onReset={() => {
         if (window.confirm('현재 프리셋의 학습 기록을 초기화할까요? 공통 오답 기록은 유지됩니다.')) setTraining((current) => ({ ...current, presets: current.presets.map((item) => item.id === current.activePresetId ? { ...item, statistics: defaultStatistics() } : item) }))

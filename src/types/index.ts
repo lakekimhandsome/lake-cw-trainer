@@ -9,7 +9,7 @@ export type Settings = {
   level: Level
 }
 
-export type Problem = { text: string; level: Level }
+export type Problem = { text: string; translation: string; level: Level }
 
 export type GradePart = { value: string; kind: 'correct' | 'substitution' | 'missing' | 'extra' }
 
