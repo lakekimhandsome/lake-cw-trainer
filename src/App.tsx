@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Radio } from 'lucide-react'
 import { AnswerInput } from './components/AnswerInput'
 import { AudioControls } from './components/AudioControls'
 import { GradingResult } from './components/GradingResult'
@@ -70,7 +71,7 @@ export default function App() {
   }
 
   return <main className="app-shell">
-    <header><a className="brand" href="/" aria-label="Lake CW Trainer 처음으로"><span className="brand-mark">⌁</span><span>LAKE <b>CW TRAINER</b></span></a><div className="mode-pill"><i /> RX MODE</div></header>
+    <header><a className="brand" href="/" aria-label="Lake CW Trainer 처음으로"><span className="brand-mark"><Radio size={22} aria-hidden="true" /></span><span>LAKE <b>CW TRAINER</b></span></a><div className="mode-pill"><i /> RX MODE</div></header>
     <div className="layout">
       <section className="trainer-card">
         <div className="lesson-head"><div><div className="section-kicker">수신 훈련</div><h1>소리를 듣고<br />교신을 읽으세요.</h1></div><label className="level-select">난이도 <select value={settings.level} onChange={(event) => updateSettings({ level: Number(event.target.value) as Level })}>{[1, 2, 3, 4, 5].map((level) => <option key={level} value={level}>Level {level}</option>)}</select></label></div>
