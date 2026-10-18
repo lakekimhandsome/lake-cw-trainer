@@ -60,6 +60,11 @@ export function TransmitTrainer({ problem, settings, onNext }: Props) {
 
   useEffect(() => {
     const keyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && !event.isComposing) {
+        event.preventDefault()
+        if (!event.repeat) grade ? onNext() : submit()
+        return
+      }
       // Tab keeps the controls reachable; browser and OS shortcuts keep their normal behavior.
       if (event.key === 'Tab' || event.isComposing || event.metaKey || event.ctrlKey || event.altKey) return
       const target = event.target as HTMLElement | null
@@ -97,7 +102,7 @@ export function TransmitTrainer({ problem, settings, onNext }: Props) {
 
   return <div className="transmit-trainer">
     <div className="tx-prompt"><span className="section-kicker">이 문장을 송신하세요</span><p>{problem.text}</p><small>{problem.translation}</small></div>
-    <p className="tx-guide">아무 키나 짧게 누르면 단점(·), 길게 누르면 장점(−)입니다. 모바일에서는 아래 키 영역을 누르세요. 문자와 단어는 쉬는 시간으로 구분합니다. 단점 8개(........)를 이어 보내면 직전 문자를 지웁니다.</p>
+    <p className="tx-guide">Enter를 제외한 키를 짧게 누르면 단점(·), 길게 누르면 장점(−)입니다. Enter는 채점하고, 채점 후에는 다음 문제로 넘어갑니다. 모바일에서는 아래 키 영역을 누르세요. 문자와 단어는 쉬는 시간으로 구분합니다. 단점 8개(........)를 이어 보내면 직전 문자를 지웁니다.</p>
     <p className="tx-timing">단점 {Math.round(timing.dit)} ms · 장점 {Math.round(timing.dah)} ms<br />문자 사이 {Math.round(timing.letterPause)} ms · 단어 사이 {Math.round(timing.wordPause)} ms</p>
     <button ref={pad} type="button" className={`key-pad ${pressed ? 'pressed' : ''}`} aria-label="모스 송신 키" aria-pressed={pressed} disabled={Boolean(grade)}
       onPointerDown={(event) => { if (event.button !== 0) return; event.preventDefault(); event.currentTarget.focus(); event.currentTarget.setPointerCapture(event.pointerId); down(`pointer:${event.pointerId}`) }}
@@ -105,7 +110,7 @@ export function TransmitTrainer({ problem, settings, onNext }: Props) {
       onPointerCancel={cancel} onLostPointerCapture={() => { if (active.current?.source.startsWith('pointer:')) cancel() }}
       onContextMenu={(event) => event.preventDefault()} onBlur={cancel}>
       <span>{pressed ? 'TRANSMITTING' : grade ? 'COMPLETE' : 'HOLD TO SEND'}</span>
-      <strong>{pressed ? '송신 중' : '키 영역'}</strong><small>키보드 아무 키 · 터치 · 마우스</small>
+      <strong>{pressed ? '송신 중' : '키 영역'}</strong><small>Enter 외 키보드 · 터치 · 마우스</small>
     </button>
     <div className="tx-output"><span className="section-kicker">판독 결과</span><p aria-live="polite">{text || (marks ? '' : '입력한 부호가 여기에 표시됩니다.')}<b>{marks.replaceAll('.', '·').replaceAll('-', '−')}</b></p></div>
     {error && <p className="audio-error" role="alert">{error}</p>}
