@@ -27,9 +27,9 @@ describe('problem generation', () => {
     expect(generateProblem(1, '').text.length).toBeGreaterThan(0)
   })
 
-  it('generates one callsign when Level 2 callsigns-only mode is enabled', () => {
+  it('generates one callsign with three random suffix letters when Level 2 callsigns-only mode is enabled', () => {
     const problem = generateProblem(2, undefined, true)
-    expect(problem.text).toMatch(/^(HL[12]|JA[12]|K1|W1|DL1|VK2)(ABC|KIM|FOX|LKE|QRP|XYZ|RAD|CW)$/)
+    expect(problem.text).toMatch(/^(HL[12]|JA[12]|K1|W1|DL1|VK2)[A-Z]{3}$/)
     expect(problem.translation).toBe(problem.text)
   })
 })

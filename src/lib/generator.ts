@@ -1,9 +1,10 @@
-import { CALL_PREFIXES, NAMES, QTHS, SUFFIXES } from '../data/vocabulary'
+import { CALL_PREFIXES, NAMES, QTHS } from '../data/vocabulary'
 import { TEMPLATES } from '../data/templates'
 import type { Level, Problem } from '../types'
 
 const pick = <T,>(values: readonly T[]) => values[Math.floor(Math.random() * values.length)]
-const call = () => `${pick(CALL_PREFIXES)}${pick(SUFFIXES)}`
+const letter = () => String.fromCharCode(65 + Math.floor(Math.random() * 26))
+const call = () => `${pick(CALL_PREFIXES)}${letter()}${letter()}${letter()}`
 const rst = () => `${pick(['5', '5', '5', '5', '4'])}${pick(['9', '9', '7', '5'])}${pick(['9', '9', '9', '7', '5'])}`
 
 export function generateProblem(level: Level, previous?: string, callsignsOnly = false): Problem {
