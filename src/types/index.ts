@@ -7,6 +7,7 @@ export type Settings = {
   volume: number
   autoPlay: boolean
   level: Level
+  callsignsOnly: boolean
 }
 
 export type Problem = { text: string; translation: string; level: Level }

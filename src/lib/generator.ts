@@ -6,10 +6,15 @@ const pick = <T,>(values: readonly T[]) => values[Math.floor(Math.random() * val
 const call = () => `${pick(CALL_PREFIXES)}${pick(SUFFIXES)}`
 const rst = () => `${pick(['5', '5', '5', '5', '4'])}${pick(['9', '9', '7', '5'])}${pick(['9', '9', '9', '7', '5'])}`
 
-export function generateProblem(level: Level, previous?: string): Problem {
+export function generateProblem(level: Level, previous?: string, callsignsOnly = false): Problem {
   let text = previous ?? ''
   let translation = ''
   for (let attempt = 0; attempt < 6 && (attempt === 0 || text === previous); attempt += 1) {
+    if (level === 2 && callsignsOnly) {
+      text = call()
+      translation = text
+      continue
+    }
     const template = pick(TEMPLATES[level])
     const values = { '{RST}': rst(), '{QTH}': pick(QTHS), '{NAME}': pick(NAMES) }
     const calls: string[] = []

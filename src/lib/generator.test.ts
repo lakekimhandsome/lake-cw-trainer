@@ -26,4 +26,10 @@ describe('problem generation', () => {
   it('generates a next problem when the previous text is empty', () => {
     expect(generateProblem(1, '').text.length).toBeGreaterThan(0)
   })
+
+  it('generates one callsign when Level 2 callsigns-only mode is enabled', () => {
+    const problem = generateProblem(2, undefined, true)
+    expect(problem.text).toMatch(/^(HL[12]|JA[12]|K1|W1|DL1|VK2)(ABC|KIM|FOX|LKE|QRP|XYZ|RAD|CW)$/)
+    expect(problem.translation).toBe(problem.text)
+  })
 })

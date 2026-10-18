@@ -4,7 +4,7 @@ const settingsKey = 'lake-cw-settings'
 const statsKey = 'lake-cw-statistics'
 const trainingKey = 'lake-cw-training-v1'
 
-export const defaultSettings: Settings = { characterWpm: 20, effectiveWpm: 10, tone: 700, volume: 50, autoPlay: false, level: 1 }
+export const defaultSettings: Settings = { characterWpm: 20, effectiveWpm: 10, tone: 700, volume: 50, autoPlay: false, level: 1, callsignsOnly: false }
 export const defaultStatistics = (): Statistics => ({ total: 0, perfect: 0, totalAccuracy: 0, streak: 0, byLevel: { 1: { total: 0, perfect: 0 }, 2: { total: 0, perfect: 0 }, 3: { total: 0, perfect: 0 }, 4: { total: 0, perfect: 0 }, 5: { total: 0, perfect: 0 } } })
 
 function load<T>(key: string, fallback: T): T {

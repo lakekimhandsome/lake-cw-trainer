@@ -20,7 +20,7 @@ export default function App() {
   const preset = training.presets.find((item) => item.id === training.activePresetId)!
   const settings = { ...commonSettings, characterWpm: preset.characterWpm, effectiveWpm: preset.effectiveWpm }
   const autoPlayTimer = useRef<number | null>(null)
-  const [problem, setProblem] = useState(() => generateProblem(loadSettings().level))
+  const [problem, setProblem] = useState(() => generateProblem(commonSettings.level, undefined, commonSettings.callsignsOnly))
   const [input, setInput] = useState('')
   const [grade, setGrade] = useState<Grade | null>(null)
   const { isPlaying, error: audioError, play, stop } = useMorseAudio()
@@ -48,7 +48,7 @@ export default function App() {
 
   const nextProblem = () => {
     stopPlayback()
-    const next = generateProblem(settings.level, problem.text)
+    const next = generateProblem(settings.level, problem.text, settings.callsignsOnly)
     setProblem(next); setInput(''); setGrade(null)
     if (mode === 'rx' && settings.autoPlay) autoPlayTimer.current = window.setTimeout(() => void play(next.text, settings), 60)
   }
@@ -57,15 +57,15 @@ export default function App() {
     stopPlayback()
     const next = { ...settings, ...update }
     setSettings(next)
-    if (update.level && update.level !== settings.level) {
-      setProblem(generateProblem(update.level, problem.text)); setInput(''); setGrade(null)
+    if ((update.level && update.level !== settings.level) || update.callsignsOnly !== undefined) {
+      setProblem(generateProblem(next.level, problem.text, next.callsignsOnly)); setInput(''); setGrade(null)
     }
   }
 
   const selectPreset = (characterWpm: number, effectiveWpm: number) => {
     stopPlayback()
     setTraining((current) => applyPreset(current, characterWpm, effectiveWpm))
-    const next = generateProblem(settings.level, problem.text)
+    const next = generateProblem(settings.level, problem.text, settings.callsignsOnly)
     setProblem(next); setInput(''); setGrade(null)
   }
 
@@ -90,7 +90,7 @@ export default function App() {
         {grade && <GradingResult grade={grade} translation={problem.translation} />}
         </>}
       </section>
-      <aside><SpeedControls key={preset.id} settings={settings} presets={training.presets} activePresetId={preset.id} onApplyPreset={selectPreset} onChange={updateSettings} showAutoPlay={mode === 'rx'} /><Statistics statistics={preset.statistics} presetLabel={`${preset.characterWpm} / ${preset.effectiveWpm} WPM`} errors={training.errors} onReset={() => {
+      <aside><SpeedControls key={preset.id} settings={settings} presets={training.presets} activePresetId={preset.id} onApplyPreset={selectPreset} onChange={updateSettings} showAutoPlay={mode === 'rx'} showCallsignsOnly={settings.level === 2} /><Statistics statistics={preset.statistics} presetLabel={`${preset.characterWpm} / ${preset.effectiveWpm} WPM`} errors={training.errors} onReset={() => {
         if (window.confirm('현재 프리셋의 학습 기록을 초기화할까요? 공통 오답 기록은 유지됩니다.')) setTraining((current) => ({ ...current, presets: current.presets.map((item) => item.id === current.activePresetId ? { ...item, statistics: defaultStatistics() } : item) }))
       }} /></aside>
     </div>
