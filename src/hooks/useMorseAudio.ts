@@ -30,8 +30,9 @@ export function useMorseAudio() {
       return
     }
     try {
-      context.current ??= new AudioContextClass()
-      if (context.current.state === 'suspended') await context.current.resume()
+      if (!context.current || context.current.state === 'closed') context.current = new AudioContextClass()
+      if (context.current.state !== 'running') await context.current.resume()
+      if (context.current.state !== 'running') throw new Error('Audio did not resume')
     } catch {
       setError('오디오를 시작하지 못했습니다. 재생 버튼을 다시 눌러 주세요.')
       return
@@ -74,9 +75,10 @@ export function useMorseAudio() {
     try {
       const AudioContextClass = window.AudioContext ?? window.webkitAudioContext
       if (!AudioContextClass) throw new Error('Web Audio unavailable')
-      context.current ??= new AudioContextClass()
+      if (!context.current || context.current.state === 'closed') context.current = new AudioContextClass()
       const ctx = context.current
-      if (ctx.state === 'suspended') await ctx.resume()
+      if (ctx.state !== 'running') await ctx.resume()
+      if (ctx.state !== 'running') throw new Error('Audio did not resume')
       if (request !== revision.current) return
       const oscillator = ctx.createOscillator()
       const gain = ctx.createGain()
