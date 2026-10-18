@@ -3,7 +3,7 @@ import type { Statistics as StatisticsType } from '../types'
 
 export function Statistics({ statistics, presetLabel, errors, onReset }: { statistics: StatisticsType; presetLabel: string; errors: Record<string, number>; onReset: () => void }) {
   const average = statistics.total ? Math.round(statistics.totalAccuracy / statistics.total) : 0
-  const frequent = Object.entries(errors).sort((a, b) => b[1] - a[1])
+  const frequent = Object.entries(errors).filter(([letter]) => letter !== '<' && letter !== '>').sort((a, b) => b[1] - a[1])
   return <section className="statistics-card">
     <div className="section-heading"><div><div className="section-kicker">학습 기록</div><h2>진행 상황</h2><p className="preset-hint">{presetLabel} 프리셋</p></div><button className="text-button" onClick={onReset} aria-label="학습 기록 초기화" title="학습 기록 초기화"><Trash2 size={18} aria-hidden="true" /></button></div>
     <div className="metric-grid"><div><strong>{statistics.total}</strong><span>풀이 문제</span></div><div><strong>{statistics.perfect}</strong><span>완전 정답</span></div><div><strong>{average}%</strong><span>평균 정확도</span></div><div><strong>{statistics.streak}</strong><span>연속 정답</span></div></div>

@@ -13,4 +13,9 @@ describe('grading', () => {
     expect(grade.parts.some((part) => part.kind === 'substitution')).toBe(true)
     expect(grade.parts.some((part) => part.kind === 'extra')).toBe(true)
   })
+  it('treats procedure signs as one character', () => {
+    const grade = gradeAnswer('CQ <AR>', 'CQ <SK>')
+    expect(grade.accuracy).toBe(75)
+    expect(grade.errors).toEqual(['<AR>'])
+  })
 })
