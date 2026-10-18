@@ -27,6 +27,18 @@ export type Statistics = {
   perfect: number
   totalAccuracy: number
   streak: number
-  errors: Record<string, number>
   byLevel: Record<Level, { total: number; perfect: number }>
+}
+
+export type Preset = {
+  id: string
+  characterWpm: number
+  effectiveWpm: number
+  statistics: Statistics
+}
+
+export type Training = {
+  activePresetId: string
+  presets: Preset[]
+  errors: Record<string, number>
 }
