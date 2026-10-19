@@ -27,10 +27,25 @@ export function TransmitTrainer({ problem, settings, onNext }: Props) {
     pending.current = ''
     setText(decoded.current); setMarks('')
   }
+  const scheduleGaps = () => {
+    clearTimers()
+    timers.current = [
+      window.setTimeout(flushLetter, timing.letterGap),
+      window.setTimeout(() => {
+        flushLetter()
+        if (decoded.current && !decoded.current.endsWith(' ')) {
+          decoded.current += ' '
+          setText(decoded.current)
+        }
+      }, timing.wordGap),
+    ]
+  }
   const cancel = () => {
+    if (!active.current) return
     active.current = null
-    clearTimers(); stop(); setPressed(false)
-    flushLetter()
+    stop(); setPressed(false)
+    // Touch focus/capture changes must not turn an unfinished character into separate letters.
+    scheduleGaps()
   }
   const down = (source: string) => {
     if (active.current || grade) return
@@ -46,16 +61,7 @@ export function TransmitTrainer({ problem, settings, onNext }: Props) {
     stop(); setPressed(false)
     pending.current += timing.mark(duration)
     setMarks(pending.current)
-    timers.current = [
-      window.setTimeout(flushLetter, timing.letterGap),
-      window.setTimeout(() => {
-        flushLetter()
-        if (decoded.current && !decoded.current.endsWith(' ')) {
-          decoded.current += ' '
-          setText(decoded.current)
-        }
-      }, timing.wordGap),
-    ]
+    scheduleGaps()
   }
 
   useEffect(() => {
@@ -91,12 +97,12 @@ export function TransmitTrainer({ problem, settings, onNext }: Props) {
   useEffect(() => { if (!grade) pad.current?.focus() }, [grade])
 
   const reset = () => {
-    cancel(); decoded.current = ''; pending.current = ''
+    cancel(); clearTimers(); decoded.current = ''; pending.current = ''
     setText(''); setMarks(''); setGrade(null)
     pad.current?.focus()
   }
   const submit = () => {
-    cancel()
+    cancel(); clearTimers(); flushLetter()
     setGrade(gradeAnswer(problem.text, decoded.current))
   }
 
@@ -107,7 +113,8 @@ export function TransmitTrainer({ problem, settings, onNext }: Props) {
     <button ref={pad} type="button" className={`key-pad ${pressed ? 'pressed' : ''}`} aria-label="모스 송신 키" aria-pressed={pressed} disabled={Boolean(grade)}
       onPointerDown={(event) => { if (event.button !== 0) return; event.preventDefault(); event.currentTarget.focus(); event.currentTarget.setPointerCapture(event.pointerId); down(`pointer:${event.pointerId}`) }}
       onPointerUp={(event) => up(`pointer:${event.pointerId}`)}
-      onPointerCancel={cancel} onLostPointerCapture={() => { if (active.current?.source.startsWith('pointer:')) cancel() }}
+      onPointerCancel={(event) => { if (active.current?.source === `pointer:${event.pointerId}`) cancel() }}
+      onLostPointerCapture={(event) => { if (active.current?.source === `pointer:${event.pointerId}`) cancel() }}
       onContextMenu={(event) => event.preventDefault()} onBlur={cancel}>
       <span>{pressed ? 'TRANSMITTING' : grade ? 'COMPLETE' : 'HOLD TO SEND'}</span>
       <strong>{pressed ? '송신 중' : '키 영역'}</strong><small>Enter 외 키보드 · 터치 · 마우스</small>
