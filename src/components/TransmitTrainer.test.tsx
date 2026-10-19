@@ -31,6 +31,9 @@ function trainer() {
     onPointerUp: (event: object) => void
     onPointerCancel: (event: object) => void
     onLostPointerCapture: (event: object) => void
+    onTouchStart: (event: object) => void
+    onTouchEnd: (event: object) => void
+    onTouchCancel: (event: object) => void
     onBlur: () => void
   }
   const submit = (controls.props as { children: ReactElement<{ onClick: () => void }>[] }).children[0].props.onClick
@@ -90,5 +93,27 @@ describe('touch transmission', () => {
     vi.advanceTimersByTime(timing.letterGap)
     submit()
     expect(gradeAnswer).toHaveBeenLastCalledWith('TEST', 'H')
+  })
+
+  it.each([['....', 'H'], ['---', 'O']])('reads native touch %s without focus or pointer capture', (code, letter) => {
+    const { handlers, timing, submit } = trainer()
+    const target = { focus: vi.fn(), setPointerCapture: vi.fn(() => { throw new Error('Pointer capture unavailable') }) }
+    const pointer = { pointerType: 'touch', pointerId: 0, button: 0, currentTarget: target, preventDefault: vi.fn() }
+    const touch = { changedTouches: [{ identifier: 1 }] }
+    for (const mark of code) {
+      handlers.onPointerDown(pointer)
+      handlers.onTouchStart(touch)
+      handlers.onBlur()
+      handlers.onLostPointerCapture(pointer)
+      handlers.onTouchCancel({ changedTouches: [{ identifier: 2 }] })
+      vi.advanceTimersByTime(mark === '.' ? timing.dit : timing.dah)
+      handlers.onPointerUp(pointer)
+      handlers.onTouchEnd(touch)
+      vi.advanceTimersByTime(timing.dit)
+    }
+    submit()
+    expect(target.focus).not.toHaveBeenCalled()
+    expect(target.setPointerCapture).not.toHaveBeenCalled()
+    expect(gradeAnswer).toHaveBeenLastCalledWith('TEST', letter)
   })
 })

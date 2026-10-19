@@ -111,11 +111,14 @@ export function TransmitTrainer({ problem, settings, onNext }: Props) {
     <p className="tx-guide">Enter를 제외한 키를 짧게 누르면 단점(·), 길게 누르면 장점(−)입니다. Enter는 채점하고, 채점 후에는 다음 문제로 넘어갑니다. 모바일에서는 아래 키 영역을 누르세요. 문자와 단어는 쉬는 시간으로 구분합니다. 단점 8개(........)를 이어 보내면 직전 문자를 지웁니다.</p>
     <p className="tx-timing">단점 {Math.round(timing.dit)} ms · 장점 {Math.round(timing.dah)} ms<br />문자 사이 {Math.round(timing.letterPause)} ms · 단어 사이 {Math.round(timing.wordPause)} ms</p>
     <button ref={pad} type="button" className={`key-pad ${pressed ? 'pressed' : ''}`} aria-label="모스 송신 키" aria-pressed={pressed} disabled={Boolean(grade)}
-      onPointerDown={(event) => { if (event.button !== 0) return; event.preventDefault(); event.currentTarget.focus(); event.currentTarget.setPointerCapture(event.pointerId); down(`pointer:${event.pointerId}`) }}
+      onPointerDown={(event) => { if (event.pointerType === 'touch' || event.button !== 0) return; event.preventDefault(); event.currentTarget.focus(); event.currentTarget.setPointerCapture(event.pointerId); down(`pointer:${event.pointerId}`) }}
       onPointerUp={(event) => up(`pointer:${event.pointerId}`)}
       onPointerCancel={(event) => { if (active.current?.source === `pointer:${event.pointerId}`) cancel() }}
       onLostPointerCapture={(event) => { if (active.current?.source === `pointer:${event.pointerId}`) cancel() }}
-      onContextMenu={(event) => event.preventDefault()} onBlur={cancel}>
+      onTouchStart={(event) => down(`touch:${event.changedTouches[0].identifier}`)}
+      onTouchEnd={(event) => { for (const touch of Array.from(event.changedTouches)) up(`touch:${touch.identifier}`) }}
+      onTouchCancel={(event) => { if (Array.from(event.changedTouches).some((touch) => active.current?.source === `touch:${touch.identifier}`)) cancel() }}
+      onContextMenu={(event) => event.preventDefault()} onBlur={() => { if (!active.current?.source.startsWith('touch:')) cancel() }}>
       <span>{pressed ? 'TRANSMITTING' : grade ? 'COMPLETE' : 'HOLD TO SEND'}</span>
       <strong>{pressed ? '송신 중' : '키 영역'}</strong><small>Enter 외 키보드 · 터치 · 마우스</small>
     </button>
