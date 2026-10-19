@@ -33,7 +33,8 @@ aside { display: grid; gap: 22px; }.settings-card, .statistics-card { padding: 2
 .tx-prompt p { color: #d7f4c5; font: 600 22px/1.6 ui-monospace, monospace; overflow-wrap: anywhere; margin: 10px 0; }
 .tx-prompt small, .tx-guide { color: #a3b19f; font-size: 12px; line-height: 1.8; }
 .tx-timing { color: #9aac99; font: 11px/1.8 ui-monospace, monospace; }
-.key-pad { display: grid; gap: 10px; place-content: center; width: 100%; min-height: 170px; margin: 18px 0; border: 2px solid #465c3e; border-radius: 18px; background: #202e21; color: #c6efad; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.transmit-trainer, .transmit-trainer * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.key-pad { display: grid; gap: 10px; place-content: center; width: 100%; min-height: 170px; margin: 18px 0; border: 2px solid #465c3e; border-radius: 18px; background: #202e21; color: #c6efad; touch-action: none; }
 .key-pad span { font: 10px ui-monospace, monospace; letter-spacing: .14em; }
 .key-pad strong { font-size: 28px; }
 .key-pad small { font-size: 12px; }
