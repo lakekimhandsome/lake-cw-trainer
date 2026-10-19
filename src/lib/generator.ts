@@ -17,7 +17,7 @@ export function generateProblem(level: Level, previous?: string, callsignsOnly =
       continue
     }
     const template = pick(TEMPLATES[level])
-    const values = { '{RST}': rst(), '{QTH}': pick(QTHS), '{NAME}': pick(NAMES) }
+    const values = { '{RST}': rst(), '{QTH}': pick(QTHS), '{NAME}': pick(NAMES), '{MYCALL}': template.text.includes('{MYCALL}') ? call() : '' }
     const calls: string[] = []
     text = template.text.replaceAll('{CALL}', () => {
       const value = call()

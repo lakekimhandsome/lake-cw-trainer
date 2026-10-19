@@ -16,7 +16,7 @@ export const TEMPLATES: Record<Level, Template[]> = {
     { text: 'TNX FER CALL {CALL}', translation: '{CALL} 호출 감사합니다.' }, { text: 'HW CPY?', translation: '수신 상태가 어떠신가요?' }, { text: 'PSE AGN OM', translation: '다시 보내 주세요, 선생님.' }, { text: 'FB OM 73 ES GL', translation: '좋습니다, 선생님. 안녕히 계세요. 행운을 빕니다.' }, { text: 'WX IS FINE {QTH}', translation: '{QTH}의 날씨는 좋습니다.' }, { text: 'TNX FER NICE QSO', translation: '좋은 교신 감사합니다.' },
   ],
   5: [
-    { text: '{CALL} DE {CALL} UR RST {RST} {NAME} QTH {QTH} <BT> TNX FER NICE QSO 73 <SK>', translation: '{CALL}에서 {CALL} 호출합니다. 당신의 신호 리포트는 {RST}, 이름은 {NAME}, 위치는 {QTH}입니다. 좋은 교신 감사합니다. 안녕히 계세요. 교신을 종료합니다.' }, { text: 'CQ CQ DE {CALL} {CALL} K', translation: '전체 호출, 전체 호출. {CALL} {CALL}입니다. 응답 바랍니다.' }, { text: '{CALL} DE {CALL} GM OM UR RST {RST} QTH {QTH} <BT> 73 ES GL <SK>', translation: '{CALL}에서 {CALL} 호출합니다. 좋은 아침입니다, 선생님. 당신의 신호 리포트는 {RST}, 위치는 {QTH}입니다. 안녕히 계세요. 행운을 빕니다. 교신을 종료합니다.' },
+    { text: '{CALL} DE {CALL} UR RST {RST} {NAME} QTH {QTH} <BT> TNX FER NICE QSO 73 <SK>', translation: '{CALL}에서 {CALL} 호출합니다. 당신의 신호 리포트는 {RST}, 이름은 {NAME}, 위치는 {QTH}입니다. 좋은 교신 감사합니다. 안녕히 계세요. 교신을 종료합니다.' }, { text: 'CQ CQ DE {MYCALL} {MYCALL} K', translation: '전체 호출, 전체 호출. {MYCALL} {MYCALL}입니다. 응답 바랍니다.' }, { text: '{CALL} DE {CALL} GM OM UR RST {RST} QTH {QTH} <BT> 73 ES GL <SK>', translation: '{CALL}에서 {CALL} 호출합니다. 좋은 아침입니다, 선생님. 당신의 신호 리포트는 {RST}, 위치는 {QTH}입니다. 안녕히 계세요. 행운을 빕니다. 교신을 종료합니다.' },
   ],
 }
 

@@ -32,4 +32,23 @@ describe('problem generation', () => {
     expect(problem.text).toMatch(/^(HL[12]|JA[12]|K1|W1|DL1|VK2)[A-Z]{3}$/)
     expect(problem.translation).toBe(problem.text)
   })
+
+  it('repeats the same station callsign in a CQ call and its translation', () => {
+    let draws = 0
+    vi.spyOn(Math, 'random').mockImplementation(() => draws++ === 0 ? 0.5 : draws % 2 ? 0.1 : 0.9)
+    const problem = generateProblem(5)
+    const match = problem.text.match(/^CQ CQ DE (\S+) (\S+) K$/)
+    expect(match).not.toBeNull()
+    expect(match![1]).toBe(match![2])
+    expect(problem.translation).toBe(`전체 호출, 전체 호출. ${match![1]} ${match![1]}입니다. 응답 바랍니다.`)
+  })
+
+  it('generates separate recipient and sender callsigns for a directed call', () => {
+    let draws = 0
+    vi.spyOn(Math, 'random').mockImplementation(() => draws++ < 10 ? 0 : 0.99)
+    const problem = generateProblem(5)
+    const [recipient, , sender] = problem.text.split(' ')
+    expect(recipient).not.toBe(sender)
+    expect(problem.translation).toContain(`${recipient}에서 ${sender} 호출합니다.`)
+  })
 })
