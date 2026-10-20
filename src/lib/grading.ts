@@ -3,7 +3,7 @@ import type { Grade, GradePart } from '../types'
 const units = (value: string) => value.match(/<(?:AR|SK|BT)>|./g) ?? []
 
 export function normalizeAnswer(value: string): string {
-  return value.toUpperCase().trim().replace(/\s+/g, ' ').replace(/<\s*(AR|SK|BT)\s*>/g, '<$1>')
+  return value.toUpperCase().trim().replace(/\s+/g, ' ').replace(/<\s*(AR|SK|BT)\s*>/g, '<$1>').replace(/(^| )(AR|SK|BT)(?= |$)/g, '$1<$2>')
 }
 
 export function gradeAnswer(answer: string, input: string): Grade {

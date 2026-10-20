@@ -3,6 +3,20 @@ import { gradeAnswer, normalizeAnswer } from './grading'
 
 describe('grading', () => {
   it('normalizes case, spaces, and prosign notation', () => expect(normalizeAnswer(' cq  < ar > ')).toBe('CQ <AR>'))
+  it.each(['AR', 'SK', 'BT'])('accepts %s without angle brackets', (sign) => {
+    expect(gradeAnswer(`<${sign}>`, sign.toLowerCase())).toMatchObject({ correct: true, accuracy: 100, errors: [] })
+  })
+  it('accepts mixed prosign notation throughout an answer', () => {
+    expect(gradeAnswer('<BT> CQ <AR> <SK>', ' bt  cq < ar > sk ')).toMatchObject({ correct: true, accuracy: 100, errors: [] })
+    expect(normalizeAnswer('AR SK BT')).toBe('<AR> <SK> <BT>')
+  })
+  it('leaves prosign letters inside words and callsigns unchanged', () => {
+    expect(normalizeAnswer('K1AR SK1ABC BT2XYZ START')).toBe('K1AR SK1ABC BT2XYZ START')
+    expect(gradeAnswer('<AR>', 'K1AR').correct).toBe(false)
+  })
+  it('counts a wrong unbracketed prosign as one substitution', () => {
+    expect(gradeAnswer('CQ <AR>', 'CQ SK')).toMatchObject({ correct: false, accuracy: 75, errors: ['<AR>'] })
+  })
   it('recognizes an exact answer', () => {
     const grade = gradeAnswer('CQ DE K', 'cq  de k')
     expect(grade).toMatchObject({ correct: true, accuracy: 100 })
