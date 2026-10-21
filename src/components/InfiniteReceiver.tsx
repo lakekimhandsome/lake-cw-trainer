@@ -38,8 +38,8 @@ export function InfiniteReceiver({ settings }: { settings: Settings }) {
     </div>
     <p className="preset-hint">종료 시 끝까지 들은 문자만 채점합니다. 공백과 대소문자는 구분하지 않습니다. 설정을 바꾸면 현재 수신이 초기화됩니다.</p>
     {result && <section className={`result ${result.correct ? 'perfect' : ''}`} aria-live="polite">
-      <div className="result-top"><span>처음부터 연속 정답</span><strong>{result.count}개</strong></div>
-      <p className="answer-label">{result.correct ? '전체 일치' : `${result.count + 1}번째 문자에서 최초 불일치`} · 처음부터 {result.correct ? '끝' : '최초 오답'}까지</p>
+      <div className="result-top"><span>연속 정답</span><strong>{result.count}자</strong></div>
+      <p className="answer-label">{result.correct ? '전체 일치' : `${result.count + 1}번째 문자에서 최초 불일치`}</p>
       <p className="answer-label">정답</p><pre className="diff">{result.expected || '(없음)'}{!result.correct && result.expected.length === result.count && ' [끝]'}</pre>
       <p className="answer-label">답안</p><pre className="diff">{result.actual || '(없음)'}{!result.correct && result.actual.length === result.count && ' [누락]'}</pre>
     </section>}
