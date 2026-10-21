@@ -24,7 +24,7 @@ export default function App() {
   const [problem, setProblem] = useState(() => generateProblem(commonSettings.level === 6 ? 1 : commonSettings.level, undefined, commonSettings.callsignsOnly))
   const [input, setInput] = useState('')
   const [grade, setGrade] = useState<Grade | null>(null)
-  const { isPlaying, isSignalOn, error: audioError, play, stop } = useMorseAudio()
+  const { isPlaying, isSignalOn, activeCharacterIndex, error: audioError, play, stop } = useMorseAudio()
 
   useEffect(() => { document.title = `Lake CW Trainer — ${mode.toUpperCase()} Mode` }, [mode])
   useEffect(() => saveSettings(commonSettings), [commonSettings])
@@ -88,7 +88,7 @@ export default function App() {
         <AudioControls isPlaying={isPlaying} onPlay={() => void play(problem.text, settings)} onStop={stopPlayback} onNext={() => nextProblem()} />
         {audioError && <p className="audio-error" role="alert">{audioError}</p>}
         <AnswerInput value={input} disabled={Boolean(grade)} onChange={setInput} onSubmit={submit} />
-        {grade && <GradingResult grade={grade} translation={problem.translation} />}
+        {grade && <GradingResult grade={grade} translation={problem.translation} activeCharacterIndex={activeCharacterIndex} />}
         </>}
       </section>
       <aside><SpeedControls key={preset.id} settings={settings} presets={training.presets} activePresetId={preset.id} onApplyPreset={selectPreset} onChange={updateSettings} showAutoPlay={mode === 'rx' && settings.level !== 6} showCallsignsOnly={settings.level === 2} /><Statistics statistics={preset.statistics} presetLabel={`${preset.characterWpm} / ${preset.effectiveWpm} WPM`} errors={training.errors} onReset={() => {

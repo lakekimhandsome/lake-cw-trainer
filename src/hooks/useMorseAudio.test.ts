@@ -58,8 +58,9 @@ describe('receive signal indicator', () => {
     })
     const audio = useMorseAudio()
     const signal = vi.mocked(useState).mock.results[0].value[1]
+    const character = vi.mocked(useState).mock.results[3].value[1]
     const tick = (seconds: number) => { ctx.currentTime = seconds; frame(0) }
-    return { audio, ctx, gain, signal, tick, finish: () => finish() }
+    return { audio, ctx, gain, signal, character, tick, finish: () => finish() }
   }
 
   it('follows dots, dashes, element/letter/word gaps at zero volume', async () => {
@@ -71,6 +72,33 @@ describe('receive signal indicator', () => {
       expect(signal).toHaveBeenLastCalledWith(on)
     }
     expect(gain.gain.linearRampToValueAtTime.mock.calls.every(([level]) => level === 0)).toBe(true)
+  })
+
+  it('tracks characters through element gaps, clears letter/word gaps, and treats prosigns as one character', async () => {
+    const { audio, ctx, character, tick, finish } = setup()
+    await audio.play('A <AR>E', { ...defaultSettings, characterWpm: 20, effectiveWpm: 20 })
+    // A ends at .335; word gap ends at .755; <AR> ends at 1.535; E starts at 1.715.
+    for (const [time, index] of [[0, null], [.04, 0], [.1, 0], [.3, 0], [.34, null], [.76, 1], [.82, 1], [1.54, null], [1.72, 2], [1.78, null]] as const) {
+      tick(time)
+      expect(character).toHaveBeenLastCalledWith(index)
+    }
+    ctx.state = 'interrupted'
+    tick(.04)
+    expect(character).toHaveBeenLastCalledWith(null)
+    finish()
+    expect(character).toHaveBeenLastCalledWith(null)
+    ctx.state = 'running'
+    ctx.currentTime = 0
+    await audio.play('T', defaultSettings)
+    tick(.04)
+    expect(character).toHaveBeenLastCalledWith(0)
+    audio.stop()
+    expect(character).toHaveBeenLastCalledWith(null)
+    ctx.currentTime = 0
+    await audio.play('E', defaultSettings)
+    expect(character).toHaveBeenLastCalledWith(null)
+    tick(.04)
+    expect(character).toHaveBeenLastCalledWith(0)
   })
 
   it('uses the audio clock and switches off immediately on stop', async () => {

@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react'
+import { PlaybackText } from './PlaybackText'
 import { useMorseAudio } from '../hooks/useMorseAudio'
 import { gradeInfinite, randomCharacter } from '../lib/infinite'
 import type { Settings } from '../types'
 
 export function InfiniteReceiver({ settings }: { settings: Settings }) {
-  const { isPlaying, isSignalOn, error, play, stop } = useMorseAudio()
+  const { isPlaying, isSignalOn, activeCharacterIndex, error, play, stop } = useMorseAudio()
   const [input, setInput] = useState('')
   const [started, setStarted] = useState(false)
   const [result, setResult] = useState<ReturnType<typeof gradeInfinite> | null>(null)
@@ -42,7 +43,7 @@ export function InfiniteReceiver({ settings }: { settings: Settings }) {
     {result && <section className={`result ${result.correct ? 'perfect' : ''}`} aria-live="polite">
       <div className="result-top"><span>연속 정답</span><strong>{result.count}자</strong></div>
       <p className="answer-label">{result.correct ? '전체 일치' : `${result.count + 1}번째 문자에서 최초 불일치`}</p>
-      <p className="answer-label">정답</p><pre className="diff">{result.expected || '(없음)'}{!result.correct && result.expected.length === result.count && ' [끝]'}</pre>
+      <p className="answer-label">정답</p><pre className="diff"><PlaybackText text={result.expected || '(없음)'} activeCharacterIndex={activeCharacterIndex} />{!result.correct && result.expected.length === result.count && ' [끝]'}</pre>
       <p className="answer-label">답안</p><pre className="diff">{result.actual || '(없음)'}{!result.correct && result.actual.length === result.count && ' [누락]'}</pre>
     </section>}
   </div>

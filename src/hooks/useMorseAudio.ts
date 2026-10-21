@@ -19,6 +19,7 @@ export function useMorseAudio() {
   const [isSignalOn, setIsSignalOn] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [activeCharacterIndex, setActiveCharacterIndex] = useState<number | null>(null)
 
   const stop = useCallback(() => {
     const text = collectReceived()
@@ -32,6 +33,7 @@ export function useMorseAudio() {
     finishTimer.current = null
     if (signalFrame.current !== null) window.cancelAnimationFrame(signalFrame.current)
     signalFrame.current = null
+    setActiveCharacterIndex(null)
     setIsSignalOn(false)
     setIsPlaying(false)
     return text
@@ -60,9 +62,11 @@ export function useMorseAudio() {
     const timing = getTiming(settings.characterWpm, settings.effectiveWpm)
     const start = ctx.currentTime + 0.035
     const marks: { start: number; end: number }[] = []
+    const characters: { start: number; end: number; index: number }[] = []
     let at = start
     const schedule = (value: string, continuous = false) => {
-      tokenizeMorse(value).forEach(({ code, gapAfter }) => {
+      tokenizeMorse(value).forEach(({ code, gapAfter }, index) => {
+        const characterStart = at
         code.split('').forEach((mark, index) => {
           const duration = (mark === '.' ? timing.dit : timing.dah) / 1000
           marks.push({ start: at, end: at + duration })
@@ -86,6 +90,7 @@ export function useMorseAudio() {
           nodes.current.push(oscillator)
           at += duration + (index < code.length - 1 ? timing.elementGap / 1000 : 0)
         })
+        if (!continuous) characters.push({ start: characterStart, end: at, index })
         if (continuous) pending.current.push({ value, end: at })
         if (continuous || gapAfter === 'letter') at += timing.letterGap / 1000
         if (gapAfter === 'word') at += timing.wordGap / 1000
@@ -109,6 +114,8 @@ export function useMorseAudio() {
       if (request !== revision.current) return
       const now = ctx.currentTime
       while (marks.length && now >= marks[0].end) marks.shift()
+      while (characters.length && now >= characters[0].end) characters.shift()
+      setActiveCharacterIndex(ctx.state === 'running' && characters.length > 0 && now >= characters[0].start ? characters[0].index : null)
       setIsSignalOn(ctx.state === 'running' && marks.length > 0 && now >= marks[0].start)
       signalFrame.current = marks.length || typeof text === 'function' ? window.requestAnimationFrame(updateSignal) : null
     }
@@ -118,6 +125,7 @@ export function useMorseAudio() {
       nodes.current = []
       if (signalFrame.current !== null) window.cancelAnimationFrame(signalFrame.current)
       signalFrame.current = null
+      setActiveCharacterIndex(null)
       setIsSignalOn(false)
       setIsPlaying(false)
     }, Math.max(0, (at - ctx.currentTime) * 1000 + 30))
@@ -151,5 +159,5 @@ export function useMorseAudio() {
   }, [stop])
 
   useEffect(() => () => { stop(); void context.current?.close(); context.current = null }, [stop])
-  return { isPlaying, isSignalOn, error, play, stop, startTone }
+  return { isPlaying, isSignalOn, activeCharacterIndex, error, play, stop, startTone }
 }

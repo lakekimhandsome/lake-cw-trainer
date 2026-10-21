@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { defaultSettings } from '../lib/storage'
 import { randomCharacter } from '../lib/infinite'
@@ -6,7 +7,7 @@ import { InfiniteReceiver } from './InfiniteReceiver'
 
 const { state, audio } = vi.hoisted(() => ({
   state: { values: [] as unknown[], index: 0 },
-  audio: { isPlaying: false, isSignalOn: false, error: null, play: vi.fn(), stop: vi.fn() },
+  audio: { isPlaying: false, isSignalOn: false, activeCharacterIndex: null as number | null, error: null, play: vi.fn(), stop: vi.fn() },
 }))
 vi.mock('react', () => ({
   useRef: (current: unknown) => ({ current }),
@@ -26,7 +27,7 @@ function controls() {
   return controls.props.children as ReactElement<{ children: string; disabled?: boolean; onClick: () => void }>[]
 }
 
-beforeEach(() => { state.values = []; vi.clearAllMocks() })
+beforeEach(() => { state.values = []; audio.activeCharacterIndex = null; vi.clearAllMocks() })
 
 describe('Level 6 controls', () => {
   it('starts reception with the left button and disables replay before grading', () => {
@@ -56,6 +57,18 @@ describe('Level 6 controls', () => {
     expect(state.values[2]).toEqual({ count: 1, correct: false, expected: 'AB', actual: 'AX' })
     left.props.onClick()
     expect(controls()[1].props.disabled).toBe(true)
+  })
+
+  it('highlights the replaying character in the Level 6 answer', () => {
+    controls()[0].props.onClick()
+    state.values[0] = 'AX'
+    audio.stop.mockReturnValue('AB')
+    controls()[0].props.onClick()
+    audio.activeCharacterIndex = 1
+    state.index = 0
+    const html = renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings }))
+    expect(html).toContain('A<mark class="playing-character">B</mark>')
+    expect(html).toContain('AX')
   })
 
   it('keeps replay disabled when the displayed answer is empty', () => {
