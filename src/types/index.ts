@@ -6,7 +6,7 @@ export type Settings = {
   tone: number
   volume: number
   autoPlay: boolean
-  level: Level
+  level: Level | 6
   callsignsOnly: boolean
 }
 

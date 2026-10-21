@@ -20,10 +20,11 @@ export const TEMPLATES: Record<Level, Template[]> = {
   ],
 }
 
-export const LEVEL_GUIDES: Record<Level, { title: string; description: string }> = {
+export const LEVEL_GUIDES: Record<Level | 6, { title: string; description: string }> = {
   1: { title: '기본 약어·부호', description: 'CQ, DE, K, QSL, QRP 같은 짧은 약어와 AR·SK·BT 절차 부호, 73·88, PSE AGN 등을 듣습니다.' },
   2: { title: '호출·콜사인', description: 'CQ 호출과 콜사인(호출 부호)을 듣습니다. 예: CQ CQ DE HL1ABC K, HL1ABC DE JA1XYZ K.' },
   3: { title: '신호 리포트·위치·이름', description: 'RST(신호 리포트), QTH(위치), 이름과 리포트 감사 표현을 듣습니다. 예: UR RST 599, MY QTH IS SEOUL, MY NAME IS KIM, TNX FER RPT.' },
   4: { title: '짧은 교신 표현', description: '호출 감사, 수신 상태 확인, 재송신 요청, 날씨, 인사 등 짧은 교신 문장을 듣습니다. 예: HW CPY?, PSE AGN OM, TNX FER NICE QSO.' },
+  6: { title: '무한 수신', description: '알파벳과 숫자를 띄어쓰기 없이 계속 듣습니다. 원하는 때 종료하면 처음부터 연속으로 맞힌 문자 수와 최초 오답까지의 정답·답안을 보여줍니다.' },
   5: { title: '종합 교신', description: '콜사인·RST·이름·위치·인사·절차 부호를 조합한 긴 교신과, 콜사인을 반복하는 CQ 호출을 듣습니다.' },
 }

@@ -50,3 +50,7 @@ aside { display: grid; gap: 22px; }.settings-card, .statistics-card { padding: 2
 .signal-status { align-items: center; display: inline-flex; gap: 8px; }
 .signal-light { background: #263028; border: 1px solid #46543f; border-radius: 50%; display: inline-block; flex: none; height: 8px; width: 8px; }
 .signal-light.on { background: #b8f86e; border-color: #d3ffa5; box-shadow: 0 0 9px #b8f86e99; }
+
+.infinite-receiver textarea { width: 100%; min-height: 140px; resize: vertical; background: #0d110e; border: 1px solid #3d493d; border-radius: 11px; color: #eff3ec; font: 16px/1.65 ui-monospace, monospace; padding: 13px 14px; overflow-wrap: anywhere; }
+.infinite-receiver textarea:focus-visible { outline: 2px solid #a8ef79; outline-offset: 3px; }
+.secondary-button:disabled { cursor: default; opacity: .4; }

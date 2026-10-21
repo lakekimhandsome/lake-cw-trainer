@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { InfiniteReceiver } from './components/InfiniteReceiver'
 import { Radio } from 'lucide-react'
 import { AnswerInput } from './components/AnswerInput'
 import { AudioControls } from './components/AudioControls'
@@ -11,7 +12,7 @@ import { generateProblem } from './lib/generator'
 import { LEVEL_GUIDES } from './data/templates'
 import { gradeAnswer } from './lib/grading'
 import { applyPreset, defaultStatistics, loadSettings, loadTraining, recordGrade, saveSettings, saveTraining } from './lib/storage'
-import type { Grade, Level, Settings } from './types'
+import type { Grade, Settings } from './types'
 
 export default function App() {
   const [mode, setMode] = useState<'rx' | 'tx'>('rx')
@@ -20,7 +21,7 @@ export default function App() {
   const preset = training.presets.find((item) => item.id === training.activePresetId)!
   const settings = { ...commonSettings, characterWpm: preset.characterWpm, effectiveWpm: preset.effectiveWpm }
   const autoPlayTimer = useRef<number | null>(null)
-  const [problem, setProblem] = useState(() => generateProblem(commonSettings.level, undefined, commonSettings.callsignsOnly))
+  const [problem, setProblem] = useState(() => generateProblem(commonSettings.level === 6 ? 1 : commonSettings.level, undefined, commonSettings.callsignsOnly))
   const [input, setInput] = useState('')
   const [grade, setGrade] = useState<Grade | null>(null)
   const { isPlaying, isSignalOn, error: audioError, play, stop } = useMorseAudio()
@@ -48,7 +49,7 @@ export default function App() {
 
   const nextProblem = () => {
     stopPlayback()
-    const next = generateProblem(settings.level, problem.text, settings.callsignsOnly)
+    const next = generateProblem(settings.level === 6 ? 1 : settings.level, problem.text, settings.callsignsOnly)
     setProblem(next); setInput(''); setGrade(null)
     if (mode === 'rx' && settings.autoPlay) autoPlayTimer.current = window.setTimeout(() => void play(next.text, settings), 60)
   }
@@ -58,14 +59,14 @@ export default function App() {
     const next = { ...settings, ...update }
     setSettings(next)
     if ((update.level && update.level !== settings.level) || update.callsignsOnly !== undefined) {
-      setProblem(generateProblem(next.level, problem.text, next.callsignsOnly)); setInput(''); setGrade(null)
+      setProblem(generateProblem(next.level === 6 ? 1 : next.level, problem.text, next.callsignsOnly)); setInput(''); setGrade(null)
     }
   }
 
   const selectPreset = (characterWpm: number, effectiveWpm: number) => {
     stopPlayback()
     setTraining((current) => applyPreset(current, characterWpm, effectiveWpm))
-    const next = generateProblem(settings.level, problem.text, settings.callsignsOnly)
+    const next = generateProblem(settings.level === 6 ? 1 : settings.level, problem.text, settings.callsignsOnly)
     setProblem(next); setInput(''); setGrade(null)
   }
 
@@ -77,12 +78,12 @@ export default function App() {
   }
 
   return <main className="app-shell">
-    <header><a className="brand" href="/" aria-label="Lake CW Trainer 처음으로"><span className="brand-mark"><Radio size={22} aria-hidden="true" /></span><span>LAKE <b>CW TRAINER</b></span></a><div className="mode-switch" role="group" aria-label="훈련 모드"><button aria-pressed={mode === 'rx'} onClick={() => { stopPlayback(); setMode('rx') }}>수신 RX</button><button aria-pressed={mode === 'tx'} onClick={() => { stopPlayback(); setMode('tx') }}>송신 TX</button></div></header>
+    <header><a className="brand" href="/" aria-label="Lake CW Trainer 처음으로"><span className="brand-mark"><Radio size={22} aria-hidden="true" /></span><span>LAKE <b>CW TRAINER</b></span></a><div className="mode-switch" role="group" aria-label="훈련 모드"><button aria-pressed={mode === 'rx'} onClick={() => { stopPlayback(); setMode('rx') }}>수신 RX</button><button aria-pressed={mode === 'tx'} onClick={() => { stopPlayback(); if (settings.level === 6) updateSettings({ level: 1 }); setMode('tx') }}>송신 TX</button></div></header>
     <div className="layout">
       <section className="trainer-card">
-        <div className="lesson-head"><div><div className="section-kicker">{mode === 'rx' ? '수신 훈련' : '송신 훈련'}</div><h1>{mode === 'rx' ? <>소리를 듣고<br />교신을 읽으세요.</> : <>키를 눌러<br />교신을 보내세요.</>}</h1></div><label className="level-select">난이도 <select value={settings.level} onChange={(event) => updateSettings({ level: Number(event.target.value) as Level })}>{[1, 2, 3, 4, 5].map((level) => <option key={level} value={level}>Level {level} · {LEVEL_GUIDES[level as Level].title}</option>)}</select></label></div>
+        <div className="lesson-head"><div><div className="section-kicker">{mode === 'rx' ? '수신 훈련' : '송신 훈련'}</div><h1>{mode === 'rx' ? <>소리를 듣고<br />교신을 읽으세요.</> : <>키를 눌러<br />교신을 보내세요.</>}</h1></div><label className="level-select">난이도 <select value={settings.level} onChange={(event) => updateSettings({ level: Number(event.target.value) as Settings['level'] })}>{(mode === 'rx' ? [1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5]).map((level) => <option key={level} value={level}>Level {level} · {LEVEL_GUIDES[level as Settings['level']].title}</option>)}</select></label></div>
         <p className="level-guide" aria-live="polite"><strong>Level {settings.level} · {LEVEL_GUIDES[settings.level].title}</strong><span>{mode === 'rx' ? LEVEL_GUIDES[settings.level].description : '제시된 교신을 모스 부호로 송신하세요. 단점·장점과 문자·단어 사이 간격을 연습합니다.'}</span></p>
-        {mode === 'tx' ? <TransmitTrainer key={`${problem.text}:${settings.characterWpm}:${settings.effectiveWpm}`} problem={problem} settings={settings} onNext={nextProblem} /> : <>
+        {mode === 'rx' && settings.level === 6 ? <InfiniteReceiver key={`${preset.id}:${settings.tone}:${settings.volume}`} settings={settings} /> : mode === 'tx' ? <TransmitTrainer key={`${problem.text}:${settings.characterWpm}:${settings.effectiveWpm}`} problem={problem} settings={settings} onNext={nextProblem} /> : <>
         <div className={`signal-panel ${isPlaying ? 'active' : ''}`}><div className="signal-label"><span className="signal-status"><i className={`signal-light${isSignalOn ? ' on' : ''}`} role="img" aria-label={isSignalOn ? '수신 신호 켜짐' : '수신 신호 꺼짐'} />{isPlaying ? 'RECEIVING' : 'READY'}</span><time>CH {settings.characterWpm} · EF {settings.effectiveWpm} WPM</time></div><div className="wave" aria-hidden="true">·· ·· ··· ·· ···· · ··· ·· ···</div><p>원문은 채점 후 표시됩니다.</p></div>
         <AudioControls isPlaying={isPlaying} onPlay={() => void play(problem.text, settings)} onStop={stopPlayback} onNext={() => nextProblem()} />
         {audioError && <p className="audio-error" role="alert">{audioError}</p>}
@@ -90,7 +91,7 @@ export default function App() {
         {grade && <GradingResult grade={grade} translation={problem.translation} />}
         </>}
       </section>
-      <aside><SpeedControls key={preset.id} settings={settings} presets={training.presets} activePresetId={preset.id} onApplyPreset={selectPreset} onChange={updateSettings} showAutoPlay={mode === 'rx'} showCallsignsOnly={settings.level === 2} /><Statistics statistics={preset.statistics} presetLabel={`${preset.characterWpm} / ${preset.effectiveWpm} WPM`} errors={training.errors} onReset={() => {
+      <aside><SpeedControls key={preset.id} settings={settings} presets={training.presets} activePresetId={preset.id} onApplyPreset={selectPreset} onChange={updateSettings} showAutoPlay={mode === 'rx' && settings.level !== 6} showCallsignsOnly={settings.level === 2} /><Statistics statistics={preset.statistics} presetLabel={`${preset.characterWpm} / ${preset.effectiveWpm} WPM`} errors={training.errors} onReset={() => {
         if (window.confirm('현재 프리셋의 학습 기록을 초기화할까요? 공통 오답 기록은 유지됩니다.')) setTraining((current) => ({ ...current, presets: current.presets.map((item) => item.id === current.activePresetId ? { ...item, statistics: defaultStatistics() } : item) }))
       }} /></aside>
     </div>
