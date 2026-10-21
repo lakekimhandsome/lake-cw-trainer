@@ -12,7 +12,7 @@ export function SpeedControls({ settings, presets, activePresetId, onApplyPreset
   const changed = speed.characterWpm !== settings.characterWpm || speed.effectiveWpm !== settings.effectiveWpm
   return <section className="settings-card" aria-label="CW 설정">
     <div className="section-kicker">속도 프리셋</div>
-    <label className="preset-select">프리셋<select value={activePresetId} onChange={(event) => { const preset = presets.find((item) => item.id === event.target.value)!; onApplyPreset(preset.characterWpm, preset.effectiveWpm) }}>{presets.map((preset) => <option key={preset.id} value={preset.id}>{preset.characterWpm} / {preset.effectiveWpm} WPM</option>)}</select></label>
+    <label className="preset-select">프리셋<select value={activePresetId} onChange={(event) => { const preset = presets.find((item) => item.id === event.target.value)!; onApplyPreset(preset.characterWpm, preset.effectiveWpm) }}>{[...presets].sort((a, b) => a.characterWpm - b.characterWpm || a.effectiveWpm - b.effectiveWpm).map((preset) => <option key={preset.id} value={preset.id}>{preset.characterWpm} / {preset.effectiveWpm} WPM</option>)}</select></label>
     <Slider label="문자 속도" value={speed.characterWpm} min={5} max={40} unit="WPM" onChange={(characterWpm) => setSpeed({ characterWpm, effectiveWpm: Math.min(characterWpm, speed.effectiveWpm) })} />
     <Slider label="실효 속도" value={speed.effectiveWpm} min={5} max={speed.characterWpm} unit="WPM" onChange={(effectiveWpm) => setSpeed({ ...speed, effectiveWpm })} />
     <button className="secondary-button preset-save" disabled={!changed} onClick={() => onApplyPreset(speed.characterWpm, speed.effectiveWpm)}>프리셋 저장 및 적용</button>
