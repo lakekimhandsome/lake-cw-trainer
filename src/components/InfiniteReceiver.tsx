@@ -28,8 +28,10 @@ export function InfiniteReceiver({ settings }: { settings: Settings }) {
       <p>알파벳 A–Z · 숫자 0–9 · 종료할 때까지 계속 수신</p>
     </div>
     <div className="controls">
-      <button className="play-button" onClick={start} disabled={started && !error}>{result ? '다시 시작' : '수신 시작'}</button>
-      <button className="secondary-button" onClick={finish} disabled={!started}>종료 및 채점</button>
+      <button className="play-button" onClick={started && !error ? finish : start}>{started && !error ? '종료 및 채점' : result ? '다시 시작' : '수신 시작'}</button>
+      <button className="secondary-button" onClick={() => {
+        if (result?.expected) void play(result.expected, settings)
+      }} disabled={!result?.expected}>다시 듣기</button>
     </div>
     {error && <p className="audio-error" role="alert">{error}</p>}
     <div className="answer-form">
