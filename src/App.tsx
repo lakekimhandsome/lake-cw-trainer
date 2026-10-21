@@ -23,6 +23,7 @@ export default function App() {
   const autoPlayTimer = useRef<number | null>(null)
   const [problem, setProblem] = useState(() => generateProblem(commonSettings.level === 6 ? 1 : commonSettings.level, undefined, commonSettings.callsignsOnly))
   const [input, setInput] = useState('')
+  const [previewingCharacter, setPreviewingCharacter] = useState(false)
   const [grade, setGrade] = useState<Grade | null>(null)
   const { isPlaying, isSignalOn, activeCharacterIndex, error: audioError, play, stop } = useMorseAudio()
 
@@ -34,6 +35,7 @@ export default function App() {
   const stopPlayback = () => {
     if (autoPlayTimer.current !== null) window.clearTimeout(autoPlayTimer.current)
     stop()
+    setPreviewingCharacter(false)
   }
 
   useEffect(() => {
@@ -85,15 +87,14 @@ export default function App() {
         <p className="level-guide" aria-live="polite"><strong>Level {settings.level} · {LEVEL_GUIDES[settings.level].title}</strong><span>{mode === 'rx' ? LEVEL_GUIDES[settings.level].description : '제시된 교신을 모스 부호로 송신하세요. 단점·장점과 문자·단어 사이 간격을 연습합니다.'}</span></p>
         {mode === 'rx' && settings.level === 6 ? <InfiniteReceiver key={`${preset.id}:${settings.tone}:${settings.volume}`} settings={settings} /> : mode === 'tx' ? <TransmitTrainer key={`${problem.text}:${settings.characterWpm}:${settings.effectiveWpm}`} problem={problem} settings={settings} onNext={nextProblem} /> : <>
         <div className={`signal-panel ${isPlaying ? 'active' : ''}`}><div className="signal-label"><span className="signal-status"><i className={`signal-light${isSignalOn ? ' on' : ''}`} role="img" aria-label={isSignalOn ? '수신 신호 켜짐' : '수신 신호 꺼짐'} />{isPlaying ? 'RECEIVING' : 'READY'}</span><time>CH {settings.characterWpm} · EF {settings.effectiveWpm} WPM</time></div><div className="wave" aria-hidden="true">·· ·· ··· ·· ···· · ··· ·· ···</div><p>원문은 채점 후 표시됩니다.</p></div>
-        <AudioControls isPlaying={isPlaying} onPlay={() => void play(problem.text, settings)} onStop={stopPlayback} onNext={() => nextProblem()} />
-        {audioError && <p className="audio-error" role="alert">{audioError}</p>}
+        <AudioControls isPlaying={isPlaying} onPlay={() => { stopPlayback(); void play(problem.text, settings) }} onStop={stopPlayback} onNext={() => nextProblem()} />
         <AnswerInput value={input} disabled={Boolean(grade)} onChange={setInput} onSubmit={submit} />
-        {grade && <GradingResult grade={grade} translation={problem.translation} activeCharacterIndex={activeCharacterIndex} />}
+        {grade && <GradingResult grade={grade} translation={problem.translation} activeCharacterIndex={previewingCharacter ? null : activeCharacterIndex} />}
         </>}
       </section>
-      <aside><SpeedControls key={preset.id} settings={settings} presets={training.presets} activePresetId={preset.id} onApplyPreset={selectPreset} onChange={updateSettings} showAutoPlay={mode === 'rx' && settings.level !== 6} showCallsignsOnly={settings.level === 2} /><Statistics statistics={preset.statistics} presetLabel={`${preset.characterWpm} / ${preset.effectiveWpm} WPM`} errors={training.errors} onReset={() => {
+      <aside><SpeedControls key={preset.id} settings={settings} presets={training.presets} activePresetId={preset.id} onApplyPreset={selectPreset} onChange={updateSettings} showAutoPlay={mode === 'rx' && settings.level !== 6} showCallsignsOnly={settings.level === 2} /><Statistics statistics={preset.statistics} presetLabel={`${preset.characterWpm} / ${preset.effectiveWpm} WPM`} errors={training.errors} onPlayCharacter={(letter) => { stopPlayback(); setPreviewingCharacter(true); void play(letter, settings) }} onReset={() => {
         if (window.confirm('현재 프리셋의 학습 기록을 초기화할까요? 공통 오답 기록은 유지됩니다.')) setTraining((current) => ({ ...current, presets: current.presets.map((item) => item.id === current.activePresetId ? { ...item, statistics: defaultStatistics() } : item) }))
-      }} /></aside>
+      }} />{audioError && <p className="audio-error" role="alert">{audioError}</p>}</aside>
     </div>
     <footer>International Morse · Farnsworth timing · 브라우저 로컬 저장</footer>
   </main>
