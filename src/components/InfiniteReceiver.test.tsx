@@ -30,6 +30,17 @@ function controls() {
 beforeEach(() => { state.values = []; audio.activeCharacterIndex = null; vi.clearAllMocks() })
 
 describe('Level 6 controls', () => {
+  it('keeps the answer editable before reception so a mobile tap can open the keyboard', () => {
+    state.index = 0
+    const html = renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings }))
+    const textarea = html.match(/<textarea\b[^>]*>/)?.[0]
+    expect(textarea).toBeDefined()
+    expect(textarea).not.toMatch(/readonly|disabled|inputMode="none"/i)
+    state.values[0] = 'DRAFT'
+    controls()[0].props.onClick()
+    expect(state.values[0]).toBe('')
+  })
+
   it('starts reception with the left button and disables replay before grading', () => {
     const [left, right] = controls()
     expect(left.props.children).toBe('수신 시작')

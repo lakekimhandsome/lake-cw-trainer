@@ -37,7 +37,7 @@ export function InfiniteReceiver({ settings }: { settings: Settings }) {
     {error && <p className="audio-error" role="alert">{error}</p>}
     <div className="answer-form">
       <label htmlFor="infinite-answer">들은 내용을 띄어쓰기 없이 입력하세요</label>
-      <textarea ref={field} id="infinite-answer" value={input} readOnly={!started} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="예: A7KB2Z" onChange={(event) => setInput(event.target.value.toUpperCase())} />
+      <textarea ref={field} id="infinite-answer" value={input} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="예: A7KB2Z" onChange={(event) => setInput(event.target.value.toUpperCase())} />
     </div>
     <p className="preset-hint">종료 시 끝까지 들은 문자만 채점합니다. 공백과 대소문자는 구분하지 않습니다. 설정을 바꾸면 현재 수신이 초기화됩니다.</p>
     {result && <section className={`result ${result.correct ? 'perfect' : ''}`} aria-live="polite">
