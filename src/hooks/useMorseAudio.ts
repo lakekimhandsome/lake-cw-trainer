@@ -63,9 +63,10 @@ export function useMorseAudio() {
     const start = ctx.currentTime + 0.035
     const marks: { start: number; end: number }[] = []
     const characters: { start: number; end: number; index: number }[] = []
+    let characterIndex = 0
     let at = start
     const schedule = (value: string, continuous = false) => {
-      tokenizeMorse(value).forEach(({ code, gapAfter }, index) => {
+      tokenizeMorse(value).forEach(({ code, gapAfter }) => {
         const characterStart = at
         code.split('').forEach((mark, index) => {
           const duration = (mark === '.' ? timing.dit : timing.dah) / 1000
@@ -90,7 +91,7 @@ export function useMorseAudio() {
           nodes.current.push(oscillator)
           at += duration + (index < code.length - 1 ? timing.elementGap / 1000 : 0)
         })
-        if (!continuous) characters.push({ start: characterStart, end: at, index })
+        characters.push({ start: characterStart, end: at + (continuous ? timing.letterGap / 1000 : 0), index: characterIndex++ })
         if (continuous) pending.current.push({ value, end: at })
         if (continuous || gapAfter === 'letter') at += timing.letterGap / 1000
         if (gapAfter === 'word') at += timing.wordGap / 1000
@@ -101,6 +102,7 @@ export function useMorseAudio() {
       const fill = () => {
         if (request !== revision.current) return
         collectReceived()
+        while (characters.length && ctx.currentTime >= characters[0].end) characters.shift()
         while (marks.length && ctx.currentTime >= marks[0].end) marks.shift()
         // Keep only a short lookahead; never build an unbounded audio queue.
         at = Math.max(at, ctx.currentTime + 0.035)

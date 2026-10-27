@@ -29,7 +29,7 @@ function controls() {
   return controls.props.children as ReactElement<{ children: string; disabled?: boolean; onClick: () => void }>[]
 }
 
-beforeEach(() => { state.values = []; audio.activeCharacterIndex = null; vi.clearAllMocks() })
+beforeEach(() => { state.values = []; audio.isPlaying = false; audio.activeCharacterIndex = null; vi.clearAllMocks() })
 
 describe('Level 6 controls', () => {
   it('keeps the answer editable before reception so a mobile tap can open the keyboard', () => {
@@ -83,6 +83,24 @@ describe('Level 6 controls', () => {
     const html = renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings, onGrade }))
     expect(html).toContain('A<mark class="playing-character">B</mark>')
     expect(html).toContain('AX')
+  })
+
+  it('shows the current one-based character number only during reception', () => {
+    const markup = () => {
+      state.index = 0
+      return renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings, onGrade }))
+    }
+    expect(markup()).not.toContain('번째 문자')
+    controls()[0].props.onClick()
+    audio.isPlaying = true
+    expect(markup()).toContain('수신 준비 중')
+    audio.activeCharacterIndex = 0
+    expect(markup()).toContain('현재 1번째 문자')
+    audio.activeCharacterIndex = 11
+    expect(markup()).toContain('현재 12번째 문자')
+    audio.stop.mockReturnValue('')
+    controls()[0].props.onClick()
+    expect(markup()).not.toContain('현재 12번째 문자')
   })
 
   it('keeps replay disabled when the displayed answer is empty', () => {

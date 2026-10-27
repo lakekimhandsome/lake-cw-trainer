@@ -27,6 +27,7 @@ export function InfiniteReceiver({ settings, onGrade }: { settings: Settings; on
   return <div className="infinite-receiver">
     <div className={`signal-panel ${isPlaying ? 'active' : ''}`}>
       <div className="signal-label"><span className="signal-status"><i className={`signal-light${isSignalOn ? ' on' : ''}`} role="img" aria-label={isSignalOn ? '수신 신호 켜짐' : '수신 신호 꺼짐'} />{isPlaying ? 'RECEIVING ∞' : 'READY'}</span><time>CH {settings.characterWpm} · EF {settings.effectiveWpm} WPM</time></div>
+      {started && isPlaying && <p>{activeCharacterIndex === null ? '수신 준비 중' : `현재 ${activeCharacterIndex + 1}번째 문자`}</p>}
       <div className="wave" aria-hidden="true">·· ·· ··· ·· ···· · ··· ·· ···</div>
       <p>알파벳 A–Z · 숫자 0–9 · 종료할 때까지 계속 수신</p>
     </div>

@@ -145,27 +145,42 @@ describe('continuous reception', () => {
       createGain: () => ({ gain: { setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn() } }),
     }
     let fill: () => void = () => {}
+    let frame: FrameRequestCallback = () => {}
     vi.stubGlobal('window', {
       AudioContext: vi.fn(function () { return ctx }),
       setTimeout: vi.fn((callback: () => void) => { fill = callback; return 1 }), clearTimeout: vi.fn(),
-      requestAnimationFrame: vi.fn(), cancelAnimationFrame: vi.fn(),
+      requestAnimationFrame: vi.fn((callback: FrameRequestCallback) => { frame = callback; return 1 }), cancelAnimationFrame: vi.fn(),
     })
     const audio = useMorseAudio()
     const next = vi.fn(() => 'E')
     await audio.play(next, { ...defaultSettings, characterWpm: 20, effectiveWpm: 20 })
+    const character = vi.mocked(useState).mock.results[3].value[1]
+    frame(0)
+    expect(character).toHaveBeenLastCalledWith(null)
+    ctx.currentTime = .04
+    frame(0)
+    expect(character).toHaveBeenLastCalledWith(0)
     expect(starts[0]).toBeCloseTo(.035)
     // The second E follows the 60ms dot and 180ms letter gap, without a chunk pause.
     ctx.currentTime = .1
     fill()
+    frame(0)
+    expect(character).toHaveBeenLastCalledWith(0)
     expect(starts[1]).toBeCloseTo(.275)
     ctx.currentTime = .3 // The second dot is still sounding and must not be graded.
+    frame(0)
+    expect(character).toHaveBeenLastCalledWith(1)
     expect(audio.stop()).toBe('E')
+    expect(character).toHaveBeenLastCalledWith(null)
     const calls = next.mock.calls.length
     fill()
     expect(next).toHaveBeenCalledTimes(calls)
     expect(window.clearTimeout).toHaveBeenCalledWith(1)
     // A new session starts with an empty received string.
     await audio.play(next, defaultSettings)
+    ctx.currentTime += .04
+    frame(0)
+    expect(character).toHaveBeenLastCalledWith(0)
     expect(audio.stop()).toBe('')
   })
 })
