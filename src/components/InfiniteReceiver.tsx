@@ -4,7 +4,7 @@ import { useMorseAudio } from '../hooks/useMorseAudio'
 import { gradeInfinite, randomCharacter } from '../lib/infinite'
 import type { Settings } from '../types'
 
-export function InfiniteReceiver({ settings, onGrade }: { settings: Settings; onGrade: (count: number) => void }) {
+export function InfiniteReceiver({ settings, best, onGrade }: { settings: Settings; best: number; onGrade: (count: number) => void }) {
   const { isPlaying, isSignalOn, activeCharacterIndex, error, play, stop } = useMorseAudio()
   const [input, setInput] = useState('')
   const [started, setStarted] = useState(false)
@@ -27,9 +27,11 @@ export function InfiniteReceiver({ settings, onGrade }: { settings: Settings; on
   return <div className="infinite-receiver">
     <div className={`signal-panel ${isPlaying ? 'active' : ''}`}>
       <div className="signal-label"><span className="signal-status"><i className={`signal-light${isSignalOn ? ' on' : ''}`} role="img" aria-label={isSignalOn ? '수신 신호 켜짐' : '수신 신호 꺼짐'} />{isPlaying ? 'RECEIVING ∞' : 'READY'}</span><time>CH {settings.characterWpm} · EF {settings.effectiveWpm} WPM</time></div>
-      {started && isPlaying && <p>{activeCharacterIndex === null ? '수신 준비 중' : `현재 ${activeCharacterIndex + 1}번째 문자`}</p>}
-      <div className="wave" aria-hidden="true">·· ·· ··· ·· ···· · ··· ·· ···</div>
-      <p>알파벳 A–Z · 숫자 0–9 · 종료할 때까지 계속 수신</p>
+      <dl className="infinite-metrics">
+        <div><dt>현재 수신</dt><dd>{started && isPlaying && activeCharacterIndex !== null ? <><strong>{activeCharacterIndex + 1}</strong><span>번째 문자</span></> : <strong>—</strong>}</dd></div>
+        <div><dt>프리셋 최고 기록</dt><dd><strong>{best}</strong><span>자 연속 정답</span></dd></div>
+      </dl>
+      <p className="infinite-guide">{started && isPlaying && activeCharacterIndex === null ? '수신 준비 중 · ' : ''}A–Z · 0–9 · 종료할 때까지 계속 수신</p>
     </div>
     <div className="controls">
       <button className="play-button" onClick={started && !error ? finish : start}>{started && !error ? '종료 및 채점' : result ? '다시 시작' : '수신 시작'}</button>

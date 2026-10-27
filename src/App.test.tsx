@@ -63,13 +63,16 @@ it('records Level 6 results and resets only the current preset after confirmatio
   state.values[1] = { ...state.values[1] as Settings, level: 6 }
   findElement<Parameters<typeof InfiniteReceiver>[0]>(view(), InfiniteReceiver)!.props.onGrade(12)
   expect(findElement<Parameters<typeof Statistics>[0]>(view(), Statistics)!.props.statistics.infiniteBest).toBe(12)
+  expect(findElement<Parameters<typeof InfiniteReceiver>[0]>(view(), InfiniteReceiver)!.props.best).toBe(12)
   state.values[2] = applyPreset(state.values[2] as Training, 30, 15)
   findElement<Parameters<typeof InfiniteReceiver>[0]>(view(), InfiniteReceiver)!.props.onGrade(7)
   const statistics = () => findElement<Parameters<typeof Statistics>[0]>(view(), Statistics)!.props
   statistics().onReset()
   expect(statistics().statistics.infiniteBest).toBe(7)
+  expect(findElement<Parameters<typeof InfiniteReceiver>[0]>(view(), InfiniteReceiver)!.props.best).toBe(7)
   confirm.mockReturnValue(true)
   statistics().onReset()
   expect(statistics().statistics.infiniteBest).toBe(0)
+  expect(findElement<Parameters<typeof InfiniteReceiver>[0]>(view(), InfiniteReceiver)!.props.best).toBe(0)
   expect((state.values[2] as Training).presets[0].statistics.infiniteBest).toBe(12)
 })

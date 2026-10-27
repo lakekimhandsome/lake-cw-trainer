@@ -23,7 +23,7 @@ const onGrade = vi.fn()
 
 function controls() {
   state.index = 0
-  const view = InfiniteReceiver({ settings: defaultSettings, onGrade })
+  const view = InfiniteReceiver({ settings: defaultSettings, best: 37, onGrade })
   const children = view.props.children as ReactElement<{ className?: string; children: unknown }>[]
   const controls = children.find((child) => child?.props?.className === 'controls')!
   return controls.props.children as ReactElement<{ children: string; disabled?: boolean; onClick: () => void }>[]
@@ -34,7 +34,7 @@ beforeEach(() => { state.values = []; audio.isPlaying = false; audio.activeChara
 describe('Level 6 controls', () => {
   it('keeps the answer editable before reception so a mobile tap can open the keyboard', () => {
     state.index = 0
-    const html = renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings, onGrade }))
+    const html = renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings, best: 37, onGrade }))
     const textarea = html.match(/<textarea\b[^>]*>/)?.[0]
     expect(textarea).toBeDefined()
     expect(textarea).not.toMatch(/readonly|disabled|inputMode="none"/i)
@@ -80,7 +80,7 @@ describe('Level 6 controls', () => {
     controls()[0].props.onClick()
     audio.activeCharacterIndex = 1
     state.index = 0
-    const html = renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings, onGrade }))
+    const html = renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings, best: 37, onGrade }))
     expect(html).toContain('A<mark class="playing-character">B</mark>')
     expect(html).toContain('AX')
   })
@@ -88,19 +88,20 @@ describe('Level 6 controls', () => {
   it('shows the current one-based character number only during reception', () => {
     const markup = () => {
       state.index = 0
-      return renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings, onGrade }))
+      return renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings, best: 37, onGrade }))
     }
-    expect(markup()).not.toContain('번째 문자')
+    expect(markup()).toContain('<strong>—</strong>')
+    expect(markup()).toContain('<strong>37</strong><span>자 연속 정답</span>')
     controls()[0].props.onClick()
     audio.isPlaying = true
     expect(markup()).toContain('수신 준비 중')
     audio.activeCharacterIndex = 0
-    expect(markup()).toContain('현재 1번째 문자')
+    expect(markup()).toContain('<strong>1</strong><span>번째 문자</span>')
     audio.activeCharacterIndex = 11
-    expect(markup()).toContain('현재 12번째 문자')
+    expect(markup()).toContain('<strong>12</strong><span>번째 문자</span>')
     audio.stop.mockReturnValue('')
     controls()[0].props.onClick()
-    expect(markup()).not.toContain('현재 12번째 문자')
+    expect(markup()).not.toContain('<strong>12</strong><span>번째 문자</span>')
   })
 
   it('keeps replay disabled when the displayed answer is empty', () => {

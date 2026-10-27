@@ -56,3 +56,14 @@ aside { display: grid; gap: 22px; }.settings-card, .statistics-card { padding: 2
 .secondary-button:disabled { cursor: default; opacity: .4; }
 
 .playing-character { background: #b8f86e; color: #101411; border-radius: 3px; box-shadow: 0 0 0 2px #b8f86e; }
+
+.infinite-receiver .signal-panel { display: grid; gap: 22px; min-height: 0; }
+.infinite-receiver .signal-label { flex-wrap: wrap; gap: 8px 16px; }
+.infinite-metrics { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin: 0; }
+.infinite-metrics > div + div { border-left: 1px solid #303932; padding-left: 16px; }
+.infinite-metrics dt { color: #aab8a7; font-size: 12px; }
+.infinite-metrics dd { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin: 8px 0 0; overflow-wrap: anywhere; }
+.infinite-metrics strong { color: #b8f86e; font-size: clamp(28px, 4vw, 40px); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.infinite-metrics > div + div strong { color: #f1f4ed; }
+.infinite-metrics dd span { color: #aab8a7; font-size: 12px; }
+.infinite-receiver .infinite-guide { position: static; color: #8e998e; line-height: 1.6; }
