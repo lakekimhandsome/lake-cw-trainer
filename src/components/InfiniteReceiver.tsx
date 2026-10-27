@@ -4,7 +4,7 @@ import { useMorseAudio } from '../hooks/useMorseAudio'
 import { gradeInfinite, randomCharacter } from '../lib/infinite'
 import type { Settings } from '../types'
 
-export function InfiniteReceiver({ settings }: { settings: Settings }) {
+export function InfiniteReceiver({ settings, onGrade }: { settings: Settings; onGrade: (count: number) => void }) {
   const { isPlaying, isSignalOn, activeCharacterIndex, error, play, stop } = useMorseAudio()
   const [input, setInput] = useState('')
   const [started, setStarted] = useState(false)
@@ -18,7 +18,9 @@ export function InfiniteReceiver({ settings }: { settings: Settings }) {
   }
   const finish = () => {
     const answer = stop()
-    setResult(gradeInfinite(answer, input))
+    const graded = gradeInfinite(answer, input)
+    setResult(graded)
+    onGrade(graded.count)
     setStarted(false)
   }
 

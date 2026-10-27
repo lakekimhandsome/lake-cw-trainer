@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { gradeAnswer } from './grading'
-import { applyPreset, defaultStatistics, loadSettings, loadTraining, recordGrade, saveSettings, saveTraining } from './storage'
+import { applyPreset, defaultStatistics, loadSettings, loadTraining, recordGrade, recordInfinite, saveSettings, saveTraining } from './storage'
 
 describe('preset storage', () => {
   beforeEach(() => {
@@ -56,4 +56,18 @@ describe('preset storage', () => {
     localStorage.setItem('lake-cw-training-v1', JSON.stringify({ activePresetId: 'missing', presets: [] }))
     expect(loadTraining().presets).toHaveLength(1)
   })
+
+  it('persists Level 6 bests per preset without lowering them or changing other metrics', () => {
+    let training = loadTraining()
+    delete training.presets[0].statistics.infiniteBest
+    training = recordInfinite(training, 12)
+    training = recordInfinite(training, 3)
+    training = applyPreset(training, 30, 15)
+    training = recordInfinite(training, 7)
+    saveTraining(training)
+    const restored = loadTraining()
+    expect(restored.presets.map((preset) => preset.statistics.infiniteBest)).toEqual([12, 7])
+    expect(restored.presets[0].statistics.total).toBe(0)
+  })
+
 })

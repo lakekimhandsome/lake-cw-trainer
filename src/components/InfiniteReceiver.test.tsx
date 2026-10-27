@@ -19,9 +19,11 @@ vi.mock('react', () => ({
 }))
 vi.mock('../hooks/useMorseAudio', () => ({ useMorseAudio: () => audio }))
 
+const onGrade = vi.fn()
+
 function controls() {
   state.index = 0
-  const view = InfiniteReceiver({ settings: defaultSettings })
+  const view = InfiniteReceiver({ settings: defaultSettings, onGrade })
   const children = view.props.children as ReactElement<{ className?: string; children: unknown }>[]
   const controls = children.find((child) => child?.props?.className === 'controls')!
   return controls.props.children as ReactElement<{ children: string; disabled?: boolean; onClick: () => void }>[]
@@ -32,7 +34,7 @@ beforeEach(() => { state.values = []; audio.activeCharacterIndex = null; vi.clea
 describe('Level 6 controls', () => {
   it('keeps the answer editable before reception so a mobile tap can open the keyboard', () => {
     state.index = 0
-    const html = renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings }))
+    const html = renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings, onGrade }))
     const textarea = html.match(/<textarea\b[^>]*>/)?.[0]
     expect(textarea).toBeDefined()
     expect(textarea).not.toMatch(/readonly|disabled|inputMode="none"/i)
@@ -65,6 +67,7 @@ describe('Level 6 controls', () => {
     expect(replay.props.disabled).toBe(false)
     replay.props.onClick()
     expect(audio.play).toHaveBeenLastCalledWith('AB', defaultSettings)
+    expect(onGrade).toHaveBeenCalledExactlyOnceWith(1)
     expect(state.values[2]).toEqual({ count: 1, correct: false, expected: 'AB', actual: 'AX' })
     left.props.onClick()
     expect(controls()[1].props.disabled).toBe(true)
@@ -77,7 +80,7 @@ describe('Level 6 controls', () => {
     controls()[0].props.onClick()
     audio.activeCharacterIndex = 1
     state.index = 0
-    const html = renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings }))
+    const html = renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings, onGrade }))
     expect(html).toContain('A<mark class="playing-character">B</mark>')
     expect(html).toContain('AX')
   })

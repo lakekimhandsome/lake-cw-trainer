@@ -11,7 +11,7 @@ import { useMorseAudio } from './hooks/useMorseAudio'
 import { generateProblem } from './lib/generator'
 import { LEVEL_GUIDES } from './data/templates'
 import { gradeAnswer } from './lib/grading'
-import { applyPreset, defaultStatistics, loadSettings, loadTraining, recordGrade, saveSettings, saveTraining } from './lib/storage'
+import { applyPreset, defaultStatistics, loadSettings, loadTraining, recordGrade, recordInfinite, saveSettings, saveTraining } from './lib/storage'
 import type { Grade, Settings } from './types'
 
 export default function App() {
@@ -85,7 +85,7 @@ export default function App() {
       <section className="trainer-card">
         <div className="lesson-head"><div><div className="section-kicker">{mode === 'rx' ? '수신 훈련' : '송신 훈련'}</div><h1>{mode === 'rx' ? <>소리를 듣고<br />교신을 읽으세요.</> : <>키를 눌러<br />교신을 보내세요.</>}</h1></div><label className="level-select">난이도 <select value={settings.level} onChange={(event) => updateSettings({ level: Number(event.target.value) as Settings['level'] })}>{(mode === 'rx' ? [1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5]).map((level) => <option key={level} value={level}>Level {level} · {LEVEL_GUIDES[level as Settings['level']].title}</option>)}</select></label></div>
         <p className="level-guide" aria-live="polite"><strong>Level {settings.level} · {LEVEL_GUIDES[settings.level].title}</strong><span>{mode === 'rx' ? LEVEL_GUIDES[settings.level].description : '제시된 교신을 모스 부호로 송신하세요. 단점·장점과 문자·단어 사이 간격을 연습합니다.'}</span></p>
-        {mode === 'rx' && settings.level === 6 ? <InfiniteReceiver key={`${preset.id}:${settings.tone}:${settings.volume}`} settings={settings} /> : mode === 'tx' ? <TransmitTrainer key={`${problem.text}:${settings.characterWpm}:${settings.effectiveWpm}`} problem={problem} settings={settings} onNext={nextProblem} /> : <>
+        {mode === 'rx' && settings.level === 6 ? <InfiniteReceiver key={`${preset.id}:${settings.tone}:${settings.volume}`} settings={settings} onGrade={(count) => setTraining((current) => recordInfinite(current, count))} /> : mode === 'tx' ? <TransmitTrainer key={`${problem.text}:${settings.characterWpm}:${settings.effectiveWpm}`} problem={problem} settings={settings} onNext={nextProblem} /> : <>
         <div className={`signal-panel ${isPlaying ? 'active' : ''}`}><div className="signal-label"><span className="signal-status"><i className={`signal-light${isSignalOn ? ' on' : ''}`} role="img" aria-label={isSignalOn ? '수신 신호 켜짐' : '수신 신호 꺼짐'} />{isPlaying ? 'RECEIVING' : 'READY'}</span><time>CH {settings.characterWpm} · EF {settings.effectiveWpm} WPM</time></div><div className="wave" aria-hidden="true">·· ·· ··· ·· ···· · ··· ·· ···</div><p>원문은 채점 후 표시됩니다.</p></div>
         <AudioControls isPlaying={isPlaying} onPlay={() => { stopPlayback(); void play(problem.text, settings) }} onStop={stopPlayback} onNext={() => nextProblem()} />
         <AnswerInput value={input} disabled={Boolean(grade)} onChange={setInput} onSubmit={submit} />
@@ -93,7 +93,7 @@ export default function App() {
         </>}
       </section>
       <aside><SpeedControls key={preset.id} settings={settings} presets={training.presets} activePresetId={preset.id} onApplyPreset={selectPreset} onChange={updateSettings} showAutoPlay={mode === 'rx' && settings.level !== 6} showCallsignsOnly={settings.level === 2} /><Statistics statistics={preset.statistics} presetLabel={`${preset.characterWpm} / ${preset.effectiveWpm} WPM`} errors={training.errors} onPlayCharacter={(letter) => { stopPlayback(); setPreviewingCharacter(true); void play(letter, settings) }} onReset={() => {
-        if (window.confirm('현재 프리셋의 학습 기록을 초기화할까요? 공통 오답 기록은 유지됩니다.')) setTraining((current) => ({ ...current, presets: current.presets.map((item) => item.id === current.activePresetId ? { ...item, statistics: defaultStatistics() } : item) }))
+        if (window.confirm('현재 프리셋의 학습 기록과 레벨 6 최고 기록을 초기화할까요? 공통 오답 기록은 유지됩니다.')) setTraining((current) => ({ ...current, presets: current.presets.map((item) => item.id === current.activePresetId ? { ...item, statistics: defaultStatistics() } : item) }))
       }} />{audioError && <p className="audio-error" role="alert">{audioError}</p>}</aside>
     </div>
     <footer>International Morse · Farnsworth timing · 브라우저 로컬 저장</footer>

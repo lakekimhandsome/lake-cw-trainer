@@ -24,6 +24,7 @@ export type Grade = {
 }
 
 export type Statistics = {
+  infiniteBest?: number
   total: number
   perfect: number
   totalAccuracy: number
