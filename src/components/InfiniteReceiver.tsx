@@ -5,11 +5,15 @@ import { gradeInfinite, randomCharacter } from '../lib/infinite'
 import type { Settings } from '../types'
 
 export function InfiniteReceiver({ settings, best, onGrade }: { settings: Settings; best: number; onGrade: (count: number) => void }) {
-  const { isPlaying, isSignalOn, activeCharacterIndex, error, play, stop } = useMorseAudio()
+  const { isPlaying, isSignalOn, activeCharacterIndex, receivedText, error, play, stop } = useMorseAudio()
   const [input, setInput] = useState('')
   const [started, setStarted] = useState(false)
   const [result, setResult] = useState<ReturnType<typeof gradeInfinite> | null>(null)
   const field = useRef<HTMLTextAreaElement>(null)
+
+  const liveGrade = started && !error ? gradeInfinite(receivedText, input) : null
+  const mismatch = liveGrade && liveGrade.count < liveGrade.expected.length && liveGrade.count < liveGrade.actual.length
+    ? liveGrade.count + 1 : null
 
   const start = () => {
     setInput(''); setResult(null); setStarted(true)
@@ -42,9 +46,10 @@ export function InfiniteReceiver({ settings, best, onGrade }: { settings: Settin
     {error && <p className="audio-error" role="alert">{error}</p>}
     <div className="answer-form">
       <label htmlFor="infinite-answer">들은 내용을 띄어쓰기 없이 입력하세요</label>
-      <textarea ref={field} id="infinite-answer" value={input} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="예: A7KB2Z" onChange={(event) => setInput(event.target.value.toUpperCase())} />
+      <textarea ref={field} id="infinite-answer" value={input} aria-invalid={mismatch !== null} aria-describedby="infinite-feedback" autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="예: A7KB2Z" onChange={(event) => setInput(event.target.value.toUpperCase())} />
+      <p id="infinite-feedback" className="infinite-feedback" role="status" aria-live="polite">{mismatch !== null ? `${mismatch}번째 문자가 틀렸습니다. 입력을 확인하세요.` : ''}</p>
     </div>
-    <p className="preset-hint">종료 시 끝까지 들은 문자만 채점합니다. 공백과 대소문자는 구분하지 않습니다. 설정을 바꾸면 현재 수신이 초기화됩니다.</p>
+    <p className="preset-hint">입력 중 끝까지 들은 문자와 다르면 바로 알려드립니다. 종료 시 끝까지 들은 문자만 채점합니다. 공백과 대소문자는 구분하지 않습니다. 설정을 바꾸면 현재 수신이 초기화됩니다.</p>
     {result && <section className={`result ${result.correct ? 'perfect' : ''}`} aria-live="polite">
       <div className="result-top"><span>연속 정답</span><strong>{result.count}자</strong></div>
       <p className="answer-label">{result.correct ? '전체 일치' : `${result.count + 1}번째 문자에서 최초 불일치`}</p>

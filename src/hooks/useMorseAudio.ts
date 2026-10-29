@@ -21,6 +21,8 @@ export function useMorseAudio() {
   const [error, setError] = useState<string | null>(null)
   const [activeCharacterIndex, setActiveCharacterIndex] = useState<number | null>(null)
 
+  const [receivedText, setReceivedText] = useState('')
+
   const stop = useCallback(() => {
     const text = collectReceived()
     revision.current += 1
@@ -43,6 +45,7 @@ export function useMorseAudio() {
     stop()
     const request = revision.current
     received.current = ''
+    setReceivedText('')
     setError(null)
     const AudioContextClass = window.AudioContext ?? window.webkitAudioContext
     if (!AudioContextClass) {
@@ -101,7 +104,7 @@ export function useMorseAudio() {
     else {
       const fill = () => {
         if (request !== revision.current) return
-        collectReceived()
+        setReceivedText(collectReceived())
         while (characters.length && ctx.currentTime >= characters[0].end) characters.shift()
         while (marks.length && ctx.currentTime >= marks[0].end) marks.shift()
         // Keep only a short lookahead; never build an unbounded audio queue.
@@ -161,5 +164,5 @@ export function useMorseAudio() {
   }, [stop])
 
   useEffect(() => () => { stop(); void context.current?.close(); context.current = null }, [stop])
-  return { isPlaying, isSignalOn, activeCharacterIndex, error, play, stop, startTone }
+  return { isPlaying, isSignalOn, activeCharacterIndex, receivedText, error, play, stop, startTone }
 }

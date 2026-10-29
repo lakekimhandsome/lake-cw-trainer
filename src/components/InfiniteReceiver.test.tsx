@@ -7,7 +7,7 @@ import { InfiniteReceiver } from './InfiniteReceiver'
 
 const { state, audio } = vi.hoisted(() => ({
   state: { values: [] as unknown[], index: 0 },
-  audio: { isPlaying: false, isSignalOn: false, activeCharacterIndex: null as number | null, error: null, play: vi.fn(), stop: vi.fn() },
+  audio: { receivedText: '', isPlaying: false, isSignalOn: false, activeCharacterIndex: null as number | null, error: null, play: vi.fn(), stop: vi.fn() },
 }))
 vi.mock('react', () => ({
   useRef: (current: unknown) => ({ current }),
@@ -29,7 +29,7 @@ function controls() {
   return controls.props.children as ReactElement<{ children: string; disabled?: boolean; onClick: () => void }>[]
 }
 
-beforeEach(() => { state.values = []; audio.isPlaying = false; audio.activeCharacterIndex = null; vi.clearAllMocks() })
+beforeEach(() => { state.values = []; audio.receivedText = ''; audio.isPlaying = false; audio.activeCharacterIndex = null; vi.clearAllMocks() })
 
 describe('Level 6 controls', () => {
   it('keeps the answer editable before reception so a mobile tap can open the keyboard', () => {
@@ -102,6 +102,33 @@ describe('Level 6 controls', () => {
     audio.stop.mockReturnValue('')
     controls()[0].props.onClick()
     expect(markup()).not.toContain('<strong>12</strong><span>번째 문자</span>')
+  })
+
+  it('reports live mismatches, clears corrections, and ignores missing or unfinished characters', () => {
+    const markup = () => {
+      state.index = 0
+      return renderToStaticMarkup(InfiniteReceiver({ settings: defaultSettings, best: 37, onGrade }))
+    }
+    controls()[0].props.onClick()
+    audio.receivedText = 'AB'
+    state.values[0] = 'a x'
+    expect(markup()).toContain('2번째 문자가 틀렸습니다.')
+    expect(markup()).toContain('aria-invalid="true"')
+    expect(audio.stop).not.toHaveBeenCalled()
+    expect(onGrade).not.toHaveBeenCalled()
+    for (const input of ['a b', 'A', '', 'ABX']) {
+      state.values[0] = input
+      expect(markup()).not.toContain('문자가 틀렸습니다.')
+      expect(markup()).toContain('aria-invalid="false"')
+    }
+    // An answer typed early is checked once that character finishes sounding.
+    audio.receivedText = 'ABC'
+    expect(markup()).toContain('3번째 문자가 틀렸습니다.')
+    audio.stop.mockReturnValue('ABC')
+    controls()[0].props.onClick()
+    expect(markup()).not.toContain('문자가 틀렸습니다.')
+    controls()[0].props.onClick()
+    expect(markup()).not.toContain('문자가 틀렸습니다.')
   })
 
   it('keeps replay disabled when the displayed answer is empty', () => {

@@ -67,3 +67,7 @@ aside { display: grid; gap: 22px; }.settings-card, .statistics-card { padding: 2
 .infinite-metrics > div + div strong { color: #f1f4ed; }
 .infinite-metrics dd span { color: #aab8a7; font-size: 12px; }
 .infinite-receiver .infinite-guide { position: static; color: #8e998e; line-height: 1.6; }
+
+.infinite-receiver textarea[aria-invalid="true"] { border-color: #e98579; outline-color: #e98579; }
+.infinite-feedback { color: #ffc4bd; font-size: 13px; margin: 8px 0 0; }
+.infinite-feedback:empty { display: none; }
