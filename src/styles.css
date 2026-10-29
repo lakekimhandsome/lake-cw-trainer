@@ -71,3 +71,13 @@ aside { display: grid; gap: 22px; }.settings-card, .statistics-card { padding: 2
 .infinite-receiver textarea[aria-invalid="true"] { border-color: #e98579; outline-color: #e98579; }
 .infinite-feedback { color: #ffc4bd; font-size: 13px; margin: 8px 0 0; }
 .infinite-feedback:empty { display: none; }
+
+.account-bar { max-width: 1180px; margin: 20px auto 0; padding: 16px 20px; border: 1px solid #303932; border-radius: 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.account-bar p { margin: 5px 0 0; font-size: 13px; line-height: 1.6; color: #aab8a7; }
+.account-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.account-bar button { border: 1px solid #46543f; background: #182019; color: #d5e7cc; padding: 8px 12px; border-radius: 7px; cursor: pointer; }
+.account-bar button:disabled { opacity: .5; cursor: default; }
+.account-bar .account-error { color: #ffc4bd; width: 100%; }
+.migration-choice { width: 100%; }
+.migration-choice button { margin: 10px 8px 0 0; }
+@media (max-width: 600px) { .account-bar { margin: 12px; padding: 14px; } }

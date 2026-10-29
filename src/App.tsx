@@ -13,11 +13,12 @@ import { LEVEL_GUIDES } from './data/templates'
 import { gradeAnswer } from './lib/grading'
 import { applyPreset, defaultStatistics, loadSettings, loadTraining, recordGrade, recordInfinite, saveSettings, saveTraining } from './lib/storage'
 import type { Grade, Settings } from './types'
+import type { Snapshot } from './lib/account'
 
-export default function App() {
+export default function App({ initialSnapshot, onSnapshot }: { initialSnapshot?: Snapshot; onSnapshot?: (snapshot: Snapshot) => void } = {}) {
   const [mode, setMode] = useState<'rx' | 'tx'>('rx')
-  const [commonSettings, setSettings] = useState<Settings>(loadSettings)
-  const [training, setTraining] = useState(loadTraining)
+  const [commonSettings, setSettings] = useState<Settings>(() => initialSnapshot?.settings ?? loadSettings())
+  const [training, setTraining] = useState(() => initialSnapshot?.training ?? loadTraining())
   const preset = training.presets.find((item) => item.id === training.activePresetId)!
   const settings = { ...commonSettings, characterWpm: preset.characterWpm, effectiveWpm: preset.effectiveWpm }
   const autoPlayTimer = useRef<number | null>(null)
@@ -28,8 +29,12 @@ export default function App() {
   const { isPlaying, isSignalOn, activeCharacterIndex, error: audioError, play, stop } = useMorseAudio()
 
   useEffect(() => { document.title = `Lake CW Trainer — ${mode.toUpperCase()} Mode` }, [mode])
-  useEffect(() => saveSettings(commonSettings), [commonSettings])
-  useEffect(() => saveTraining(training), [training])
+  const snapshotChanged = useRef(onSnapshot)
+  snapshotChanged.current = onSnapshot
+  useEffect(() => {
+    if (snapshotChanged.current) snapshotChanged.current({ settings: commonSettings, training })
+    else { saveSettings(commonSettings); saveTraining(training) }
+  }, [commonSettings, training])
   useEffect(() => () => { if (autoPlayTimer.current !== null) window.clearTimeout(autoPlayTimer.current) }, [])
 
   const stopPlayback = () => {
@@ -96,6 +101,6 @@ export default function App() {
         if (window.confirm('현재 프리셋의 학습 기록과 레벨 6 최고 기록을 초기화할까요? 공통 오답 기록은 유지됩니다.')) setTraining((current) => ({ ...current, presets: current.presets.map((item) => item.id === current.activePresetId ? { ...item, statistics: defaultStatistics() } : item) }))
       }} />{audioError && <p className="audio-error" role="alert">{audioError}</p>}</aside>
     </div>
-    <footer>International Morse · Farnsworth timing · 브라우저 로컬 저장</footer>
+    <footer>International Morse · Farnsworth timing · {onSnapshot ? 'Google 계정 저장' : '브라우저 로컬 저장'}</footer>
   </main>
 }
