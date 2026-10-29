@@ -132,3 +132,22 @@ it('blocks conflicting recovered changes instead of overwriting newer cloud data
   expect(app()).toBeUndefined(); expect(mock.save).not.toHaveBeenCalled()
   expect(localStorage.getItem('cw-trainer_pending:owner')).not.toBeNull()
 })
+
+it('shows recovery controls only during an error, keeping the normal account UI simple', async () => {
+  mock.read.mockResolvedValue({ ...snapshot(), revision: 0 })
+  await render()
+  expect(button('계정 기록 불러오기')).toBeUndefined()
+  expect(button('기록 백업')).toBeUndefined()
+  expect(button('미저장 기록 백업')).toBeUndefined()
+  expect(button('계정 기록으로 복구')).toBeUndefined()
+  expect(button('로그아웃')).toBeDefined()
+  const updated = snapshot(); updated.settings.volume = 20
+  mock.save.mockRejectedValueOnce(new Error('offline'))
+  change(updated); await render(); await vi.advanceTimersByTimeAsync(300); await render()
+  expect(button('미저장 기록 백업')).toBeDefined()
+  expect(button('계정 기록으로 복구')).toBeDefined()
+  ;(button('다시 시도').props.onClick as () => void)(); await render()
+  await vi.advanceTimersByTimeAsync(300); await render()
+  expect(button('미저장 기록 백업')).toBeUndefined()
+  expect(button('계정 기록으로 복구')).toBeUndefined()
+})

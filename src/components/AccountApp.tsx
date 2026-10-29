@@ -121,19 +121,18 @@ export function AccountApp() {
 
   return <>
     <section className="account-bar" aria-label="계정 및 동기화">
-      <div><strong>{user ? user.email : '학습 기록 계정'}</strong><p role="status">{user === undefined ? '로그인 확인 중…' : !user ? 'Google 계정으로 맥과 폰의 기록을 이어서 사용하세요.' : !loaded ? '계정 기록 불러오는 중…' : !progress ? '아직 계정 기록이 없습니다. 맥에서 먼저 가져오기를 진행하세요.' : dirty || busy ? '계정에 저장 중…' : '계정에 저장됨 · 다른 기기의 최신 기록은 불러오기를 누르세요.'}</p></div>
+      <div><strong>{user ? user.email : '학습 기록 계정'}</strong><p role="status">{user === undefined ? '로그인 확인 중…' : !user ? 'Google 계정으로 맥과 폰의 기록을 이어서 사용하세요.' : !loaded ? '계정 기록 불러오는 중…' : !progress ? '아직 계정 기록이 없습니다. 맥에서 먼저 가져오기를 진행하세요.' : dirty || busy ? '계정에 저장 중…' : '계정에 저장됨'}</p></div>
       <div className="account-actions">
         {!user && user !== undefined && <button disabled={busy} onClick={() => void run(async () => {
           const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/', queryParams: { prompt: 'select_account' } } })
           if (error) throw error
         })}>Google 로그인</button>}
-        {user && <><button disabled={busy} onClick={reload}>계정 기록 불러오기</button><button disabled={busy || dirty} onClick={() => void run(async () => {
+        {user && <button disabled={busy || dirty} onClick={() => void run(async () => {
           const { error } = await supabase.auth.signOut({ scope: 'local' }); if (error) throw error
-        })}>로그아웃</button></>}
-        <button onClick={backup}>기록 백업</button>
+        })}>로그아웃</button>}
       </div>
-      {error && <p className="account-error" role="alert">{error} <button disabled={busy} onClick={() => { if (!loaded) setGeneration((n) => n + 1); setError('') }}>다시 시도</button></p>}
-      {user && loaded && !progress && <div className="migration-choice"><p>맥: 기존 기록이 있는 브라우저에서 ‘이 기기 기록 가져오기’를 한 번 누르세요. 폰: 맥에서 가져오기를 마친 뒤 ‘계정 기록 불러오기’를 누르세요. 로그인만으로 이 기기 기록을 올리지 않습니다.</p><button disabled={busy} onClick={() => void initialize()}>이 기기 기록 가져오기 (맥)</button></div>}
+      {error && <p className="account-error" role="alert">{error} <button disabled={busy} onClick={() => { if (!loaded) setGeneration((n) => n + 1); setError('') }}>다시 시도</button>{user && <> <button onClick={backup}>미저장 기록 백업</button> <button disabled={busy} onClick={reload}>계정 기록으로 복구</button></>}</p>}
+      {user && loaded && !progress && <div className="migration-choice"><p>맥: 기존 기록이 있는 브라우저에서 ‘이 기기 기록 가져오기’를 한 번 누르세요. 폰: 맥에서 가져오기를 마친 뒤 새로고침하세요. 로그인만으로 이 기기 기록을 올리지 않습니다.</p><button disabled={busy} onClick={() => void initialize()}>이 기기 기록 가져오기 (맥)</button></div>}
     </section>
     {user === null ? <App key="guest" /> : user && loaded && progress && !error ? <App key={`${user.id}:${generation}`} initialSnapshot={progress.snapshot} onSnapshot={(snapshot) => {
       if (fingerprint(snapshot) === fingerprint(current.current!.snapshot)) return
